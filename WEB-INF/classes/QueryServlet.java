@@ -29,8 +29,8 @@ public class QueryServlet extends HttpServlet {
          
       try (
          Connection conn = DriverManager.getConnection(
-         	 "jdbc:mysql://10.91.138.41:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC",
-     		 "michael", "anjay88");
+         	 "jdbc:mysql://localhost:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC",
+     		 "root", "");
          Statement stmt = conn.createStatement();
       ) {
          String sqlStr = "select * from books where author = "
@@ -45,7 +45,7 @@ public class QueryServlet extends HttpServlet {
          while(rset.next()) {
             out.println("<p>" + rset.getString("author")
                   + ", " + rset.getString("title")
-                  + ", $" + rset.getDouble("price") + "</p>");
+                  + ", $" + rset.getFloat("price") + "</p>");
             count++;
          }
          out.println("<p>==== " + count + " records found =====</p>");
