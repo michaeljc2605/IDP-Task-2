@@ -171,7 +171,7 @@ function createBookCard(book, index) {
                 </div>
                 <div class="book-actions">
                     <button class="btn btn-primary" onclick="addToCart(${book.id})">Add to Cart</button>
-                    <button class="btn btn-outline" onclick="viewDetails(${book.id})">Details</button>
+                    <a class="btn btn-outline" href="/book/${book.id}">Details</a>
                 </div>
             </div>
         </div>
