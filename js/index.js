@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // Fetch books from servlet
 async function loadBooks() {
     try {
-        // Create a servlet to get all books
         const response = await fetch('/api/books');
         
         if (!response.ok) {
@@ -89,7 +88,6 @@ function animateCounter(element, target) {
 
 // Apply filters and sorting
 function applyFilters() {
-    // Start with all books
     filteredBooks = [...allBooks];
     
     // Apply author filter
@@ -157,8 +155,16 @@ function createBookCard(book, index) {
     const stockText = stockStatus.text;
     
     card.innerHTML = `
-        <div class="book-cover" style="background: ${getRandomGradient()}">
-            <div class="book-icon">📖</div>
+        <div class="book-cover">
+            <img 
+                src="/static/bookpage/${book.id}.jpg"
+                alt="${escapeHtml(book.title)}"
+                class="book-cover-img"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+            >
+            <div class="book-cover-fallback" style="display:none; background: ${getRandomGradient()}">
+                <div class="book-icon">📖</div>
+            </div>
         </div>
         <div class="book-info">
             <h3 class="book-title">${escapeHtml(book.title)}</h3>
@@ -227,15 +233,43 @@ function showError() {
     `;
 }
 
-// Placeholder functions (implement these based on your needs)
+// Add to cart function
 function addToCart(bookId) {
     const book = allBooks.find(b => b.id === bookId);
-    alert(`Added "${book.title}" to cart!`);
-    // Implement actual cart functionality here
-}
+    if (!book) return;
 
-function viewDetails(bookId) {
-    const book = allBooks.find(b => b.id === bookId);
-    alert(`Viewing details for "${book.title}" by ${book.author}\n\nPrice: $${book.price}\nStock: ${book.qty} available`);
-    // Implement actual details modal/page here
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const existing = cart.find(item => item.id === bookId);
+
+    if (existing) {
+        existing.quantity += 1;
+    } else {
+        cart.push({
+            id: book.id,
+            title: book.title,
+            author: book.author,
+            price: book.price,
+            quantity: 1
+        });
+    }
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+
+    // Update navbar badge
+    const badge = document.getElementById('cart-badge');
+    if (badge) {
+        const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+        badge.textContent = total;
+        badge.style.display = 'flex';
+    }
+
+    // Show feedback
+    const btn = event.target;
+    const original = btn.textContent;
+    btn.textContent = '✓ Added!';
+    btn.style.background = '#22c55e';
+    setTimeout(() => {
+        btn.textContent = original;
+        btn.style.background = '';
+    }, 1500);
 }

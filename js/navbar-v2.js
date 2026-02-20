@@ -13,6 +13,16 @@
     }
   }
 
+  function updateCartBadge() {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const total = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
+    const badge = document.getElementById('cart-badge');
+    if (badge) {
+      badge.textContent = total;
+      badge.style.display = total > 0 ? 'flex' : 'none';
+    }
+  }
+
   function setupBehaviour(root){
     // add a toggle button for small screens
     let toggle = root.querySelector('.nav-toggle');
@@ -45,7 +55,6 @@
     // mark active link by matching current path
     const anchors = Array.from(linksEl.querySelectorAll('a'));
     const current = window.location.pathname + window.location.hash;
-    // prefer exact match then startsWith
     anchors.forEach(a => {
       try {
         const href = new URL(a.href, window.location.origin);
@@ -71,14 +80,17 @@
     const html = await fetchNavbarHtml();
     if (!html) return;
     placeholders.forEach(el => {
-      // inject
       el.innerHTML = html;
-      // small enhancement: wrap the default nav container with our `nav-brand` class for styling compat
       const nav = el.querySelector('nav.site-nav');
       if (nav) nav.classList.add('enhanced');
-      // run behaviour setup for this injected nav
       setupBehaviour(el);
     });
+
+    // Update cart badge after navbar is injected
+    updateCartBadge();
+
+    // Listen for cart changes from other tabs or pages
+    window.addEventListener('storage', updateCartBadge);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

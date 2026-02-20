@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Order List — eBookshop Staff</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+    <link rel="stylesheet" href="/css/footer.css">
+  </head>
+  <body class="bg-gray-50 min-h-screen flex flex-col">
+    <div class="site-navbar"></div>
+
+    <main class="flex-grow max-w-6xl mx-auto w-full px-6 py-12">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800">📦 Order List</h1>
+          <p class="text-gray-500 text-sm mt-1">All customer orders from the database</p>
+        </div>
+        <a href="/staff/index.html" class="text-sm text-gray-400 hover:text-blue-500 transition">← Back to Dashboard</a>
+      </div>
+
+      <!-- Table -->
+      <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+        <table class="w-full text-sm text-left">
+          <thead class="bg-blue-600 text-white uppercase text-xs tracking-wide">
+            <tr>
+              <th class="px-6 py-4">Order ID</th>
+              <th class="px-6 py-4">Customer Name</th>
+              <th class="px-6 py-4">Email</th>
+              <th class="px-6 py-4">Phone</th>
+              <th class="px-6 py-4">Book</th>
+              <th class="px-6 py-4">Qty</th>
+              <th class="px-6 py-4">Total</th>
+            </tr>
+          </thead>
+          <tbody id="orders-body" class="divide-y divide-gray-100">
+            <tr>
+              <td colspan="7" class="px-6 py-8 text-center text-gray-400">Loading orders...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+
+    <div class="site-footer"></div>
+    <script src="/js/navbar-v2.js"></script>
+    <script src="/js/footer-v2.js"></script>
+    <script>
+      async function loadOrders() {
+        const tbody = document.getElementById('orders-body');
+        try {
+          const resp = await fetch('/api/orders');
+          const orders = await resp.json();
+
+          if (orders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-gray-400">No orders found.</td></tr>';
+            return;
+          }
+
+          tbody.innerHTML = orders.map((o, i) => `
+            <tr class="${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition">
+              <td class="px-6 py-4 font-medium text-gray-800">#${o.id}</td>
+              <td class="px-6 py-4 text-gray-700">${o.cust_name}</td>
+              <td class="px-6 py-4 text-gray-500">${o.cust_email}</td>
+              <td class="px-6 py-4 text-gray-500">${o.cust_phone}</td>
+              <td class="px-6 py-4 text-gray-700">${o.book_title || '-'}</td>
+              <td class="px-6 py-4">
+                <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">${o.qty_ordered}</span>
+              </td>
+              <td class="px-6 py-4 font-semibold text-gray-800">$${Number(o.total_price || 0).toFixed(2)}</td>
+            </tr>
+          `).join('');
+
+        } catch (e) {
+          tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-red-400">Failed to load orders.</td></tr>';
+        }
+      }
+
+      loadOrders();
+    </script>
+  </body>
+</html>

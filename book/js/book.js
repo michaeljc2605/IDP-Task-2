@@ -125,70 +125,6 @@
   // ===================================
 
   class BookGenerator {
-    constructor() {
-      this.descriptions = {
-        1: "A masterpiece of historical fiction, this tale takes you through the tumultuous times of the French Revolution. Experience love, sacrifice, and redemption as two men's fates intertwine in the shadow of the guillotine. Dickens' vivid prose brings to life the streets of Paris and London in an unforgettable narrative.",
-        2: "Enter the glittering world of the Jazz Age where dreams and disillusionment dance together. Follow the mysterious Jay Gatsby as he pursues his impossible dream through lavish parties and tragic romance. A profound meditation on the American Dream and the corruption of wealth.",
-        3: "A powerful story of racial injustice and childhood innocence in the American South. Through Scout Finch's eyes, witness her father Atticus defend a Black man falsely accused of a terrible crime. A timeless exploration of morality, compassion, and standing up for what's right.",
-        4: "A chilling vision of totalitarian rule where Big Brother watches everything. Winston Smith struggles to maintain his humanity in a world where truth is controlled, history is rewritten, and thoughtcrime is the ultimate offense. Orwell's prophetic masterwork remains devastatingly relevant.",
-        5: "Wit, romance, and social commentary intertwine in this beloved classic. Elizabeth Bennet must navigate the treacherous waters of Georgian society while confronting her own prejudices and discovering true love. Austen's sharp observations of human nature shine throughout.",
-        6: "Follow Holden Caulfield through New York City as he grapples with adolescent angst and alienation. His distinctive voice captures the confusion and rebellion of teenage years in a story that continues to resonate with readers across generations.",
-        7: "An epic tale of obsession and revenge on the high seas. Captain Ahab's monomaniacal pursuit of the white whale Moby Dick becomes a profound meditation on fate, free will, and the nature of evil. Melville's masterpiece remains one of literature's greatest adventures.",
-        8: "A sweeping saga of Russian society during the Napoleonic era. Follow the interwoven lives of aristocratic families as they navigate love, war, and philosophical questions about life's meaning. Tolstoy's magnum opus is an unparalleled achievement in world literature."
-      };
-
-      this.reviews = [
-        {
-          name: "Sarah Mitchell",
-          date: "January 15, 2026",
-          rating: 5,
-          text: "Absolutely captivating from start to finish. The characters feel so real and the story stays with you long after you've finished reading."
-        },
-        {
-          name: "Michael Chen",
-          date: "December 28, 2025",
-          rating: 5,
-          text: "A masterpiece of storytelling. The prose is beautiful and the themes are timeless. This is literature at its finest."
-        },
-        {
-          name: "Emma Rodriguez",
-          date: "November 10, 2025",
-          rating: 4,
-          text: "Fantastic read! While some parts dragged a bit, the overall experience was incredible. Highly recommend to anyone who loves classic literature."
-        }
-      ];
-
-      this.features = [
-        {
-          icon: "📖",
-          title: "Classic Literature",
-          text: "Timeless storytelling that has captivated readers for generations"
-        },
-        {
-          icon: "⭐",
-          title: "Award Winning",
-          text: "Recognized worldwide as one of the greatest works in literary history"
-        },
-        {
-          icon: "🎓",
-          title: "Educational Value",
-          text: "Rich themes and complex characters perfect for study and discussion"
-        }
-      ];
-    }
-
-    getDescription(bookId) {
-      return this.descriptions[bookId] || "A captivating story that will transport you to another world. Experience unforgettable characters and profound themes in this literary masterpiece.";
-    }
-
-    getReviews() {
-      return this.reviews;
-    }
-
-    getFeatures() {
-      return this.features;
-    }
-
     getRating() {
       return 4.5;
     }
@@ -205,9 +141,7 @@
     }
 
     render() {
-      const description = this.generator.getDescription(this.book.id);
-      const reviews = this.generator.getReviews();
-      const features = this.generator.getFeatures();
+      const description = this.book.description || "A captivating story that will transport you to another world.";
       const rating = this.generator.getRating();
       
       const stockStatus = this.getStockStatus();
@@ -222,6 +156,12 @@
               <div class="book-cover" id="book-cover">
                 ${this.book.qty > 0 && this.book.qty <= 5 ? '<div class="book-badge">Limited Stock</div>' : ''}
                 ${this.book.qty === 0 ? '<div class="book-badge" style="background: var(--secondary)">Sold Out</div>' : ''}
+                <img 
+                  src="/static/bookpage/${this.book.id}.jpg"
+                  alt="${escapeHtml(this.book.title)}"
+                  style="width:100%; height:100%; object-fit:contain;"
+                  onerror="this.style.display='none';"
+                >
                 <div class="book-cover-title">${escapeHtml(this.book.title)}</div>
                 <div class="book-cover-author">by ${escapeHtml(this.book.author)}</div>
               </div>
@@ -282,43 +222,6 @@
             📚 About This Book
           </h2>
           <p class="description-text">${escapeHtml(description)}</p>
-        </section>
-
-        <!-- Features Grid -->
-        <section class="book-features">
-          ${features.map(feature => `
-            <div class="feature-card">
-              <div class="feature-icon">${feature.icon}</div>
-              <h3 class="feature-title">${escapeHtml(feature.title)}</h3>
-              <p class="feature-text">${escapeHtml(feature.text)}</p>
-            </div>
-          `).join('')}
-        </section>
-
-        <!-- Reviews Section -->
-        <section class="reviews-section">
-          <div class="reviews-header">
-            <h2 class="reviews-title">Reader Reviews</h2>
-            <div class="review-stats">
-              <div class="rating-stars">
-                ${this.generateStars(rating)}
-              </div>
-              <span class="meta-value">${rating.toFixed(1)}/5.0</span>
-            </div>
-          </div>
-          
-          ${reviews.map(review => `
-            <div class="review-card">
-              <div class="review-header">
-                <span class="reviewer-name">${escapeHtml(review.name)}</span>
-                <span class="review-date">${review.date}</span>
-              </div>
-              <div class="rating-stars">
-                ${this.generateStars(review.rating)}
-              </div>
-              <p class="review-text">${escapeHtml(review.text)}</p>
-            </div>
-          `).join('')}
         </section>
       `;
     }
@@ -530,7 +433,6 @@
           throw new Error('Failed to fetch book');
         }
 
-        // Try to parse JSON; if parsing fails, log the raw response for debugging
         let book;
         try {
           book = await response.json();
@@ -538,8 +440,6 @@
           const raw = await response.text();
           console.error('Failed to parse JSON response for /api/books/' + bookId + ':', jsonErr);
           console.error('Raw response:', raw);
-          // Show raw response in the UI for easier debugging
-          const root = document.getElementById('book-root');
           root.innerHTML = `<pre style="white-space:pre-wrap; background:#fff; padding:1rem; border-radius:6px;">${escapeHtml(raw)}</pre>`;
           throw jsonErr;
         }
