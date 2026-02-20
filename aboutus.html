@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>About Us — eBookshop</title>
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/navbar.css">
+  <style>
+    /* Page-specific refinements */
+    .about-hero {
+      background: linear-gradient(180deg, rgba(52,152,219,0.06), rgba(255,255,255,0.6));
+      padding: var(--space-3xl) 0;
+    }
+    .about-content { max-width: 1000px; margin: 0 auto; padding: var(--space-xl); }
+    .about-grid { display: grid; grid-template-columns: 1fr 360px; gap: var(--space-xl); align-items: start; }
+    .mission { background: var(--bg-primary); padding: var(--space-lg); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+    .team-card { background: linear-gradient(180deg, #fff, #fbfdff); padding: var(--space-md); border-radius: var(--radius-md); border: 1px solid var(--border); }
+    .team-list { display: grid; gap: var(--space-md); }
+    .cta { margin-top: var(--space-lg); display:flex; gap: var(--space-md); }
+    .values { display:flex; gap: var(--space-md); margin-top: var(--space-md); }
+    .value { flex:1; background:var(--bg-primary); padding:var(--space-md); border-radius:var(--radius-md); text-align:center; box-shadow:var(--shadow-sm); }
+    @media (max-width: 900px) { .about-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="site-navbar"></div>
+
+  <header class="about-hero">
+    <div class="container">
+      <div class="about-content">
+        <h1>About eBookshop</h1>
+        <p class="lead">We connect readers with stories that matter — beautifully, simply, and affordably.</p>
+        <div class="values">
+          <div class="value">
+            <h3>Curated Selection</h3>
+            <p>Hand-picked titles from trusted publishers and independent authors.</p>
+          </div>
+          <div class="value">
+            <h3>Customer First</h3>
+            <p>Fast support and a hassle-free experience for every reader.</p>
+          </div>
+          <div class="value">
+            <h3>Sustainable</h3>
+            <p>Digital-first approach reduces waste and broadens access to books.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container about-content">
+      <div class="about-grid">
+        <section class="mission">
+          <h2>Our Mission</h2>
+          <p>At eBookshop, our mission is simple: to make great books easy to find and joyful to read. We believe in the power of stories to inform, delight, and connect people across the globe. Whether you're searching for a classic novel, a new bestseller, or an overlooked gem, our curated catalog and thoughtful recommendations make discovery effortless.</p>
+
+          <h3>What we do</h3>
+          <ul>
+            <li>Curate high-quality titles across genres and eras</li>
+            <li>Keep prices fair and transparent</li>
+            <li>Deliver a fast, secure, and accessible reading experience</li>
+            <li>Support authors and publishers with a straightforward platform</li>
+          </ul>
+
+          <h3>How we work</h3>
+          <p>We combine editorial curation with lightweight automation — editorial teams select and tag titles, while our platform handles distribution, search, and personalized recommendations. We focus on simplicity and performance, so you can spend more time reading and less time browsing.</p>
+
+          <div class="cta">
+            <a class="btn btn-primary" href="/querybook.html">Search Our Catalog</a>
+            <a class="btn btn-outline" href="/contact.html">Contact Us</a>
+          </div>
+        </section>
+
+        <aside class="team-card">
+          <h3>Leadership & Team</h3>
+          <div class="team-list">
+            <div>
+              <strong>Alex Morgan</strong>
+              <div class="muted">Founder & CEO</div>
+            </div>
+            <div>
+              <strong>Priya Singh</strong>
+              <div class="muted">Head of Content</div>
+            </div>
+            <div>
+              <strong>Diego Alvarez</strong>
+              <div class="muted">Engineering Lead</div>
+            </div>
+          </div>
+
+          <h4 style="margin-top:var(--space-lg)">Get involved</h4>
+          <p>We're always looking for passionate readers, curators, and contributors. If you'd like to partner with us or join the team, please reach out at <a href="mailto:careers@ebookshop.com">careers@ebookshop.com</a>.</p>
+        </aside>
+      </div>
+
+      <section style="margin-top:var(--space-xl)">
+        <h2>Why customers choose us</h2>
+        <p>Our community values discovery and trust. We prioritize clear metadata, honest reviews, and a friction-free checkout so readers can confidently choose their next read.</p>
+
+        <div class="grid grid-3" style="margin-top:var(--space-md)">
+          <div class="card"><div class="card-body"><h4>Secure Checkout</h4><p>Modern payments and strict privacy practices.</p></div></div>
+          <div class="card"><div class="card-body"><h4>Curated Lists</h4><p>Themed lists and staff picks to help you find something great.</p></div></div>
+          <div class="card"><div class="card-body"><h4>Support Authors</h4><p>Fair royalties and promotional tools for creators.</p></div></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="site-footer"></div>
+
+  <link rel="stylesheet" href="/css/footer.css">
+  <script src="/js/navbar-v2.js"></script>
+  <script src="/js/footer-v2.js"></script>
+</body>
+</html>

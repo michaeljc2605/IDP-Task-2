@@ -99,7 +99,7 @@ h6 { font-size: 1rem; }
 
 p {
   margin-bottom: var(--space-md);
-  color: var(--text-secondary);
+  color: #333333;
 }
 
 a {

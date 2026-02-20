@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Staff Login — eBookshop</title>
+    <!-- Tailwind CDN for quick styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+    <link rel="stylesheet" href="/css/footer.css">
+  </head>
+  <body class="bg-gray-50 min-h-screen flex flex-col">
+    <div class="site-navbar"></div>
+
+    <main class="flex-grow flex items-center justify-center py-12 px-4">
+      <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Staff Login</h2>
+        <form id="staffLoginForm" action="/staff/login" method="post" class="space-y-4">
+          <div>
+            <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+            <input id="username" name="username" type="text" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+            <input id="password" name="password" type="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div class="flex items-center justify-between">
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700">Sign in</button>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <div class="site-footer"></div>
+    <script src="/js/navbar-v2.js"></script>
+    <script src="/js/footer-v2.js"></script>
+    <script>
+    document.getElementById('staffLoginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        const resp = await fetch('/staff/login', {
+        method: 'POST',
+        body: new URLSearchParams(formData)
+        });
+
+        if (resp.ok) {
+        window.location.href = '/staff/index.html';
+        } else {
+        const msg = await resp.text();
+        alert('Login failed: ' + msg);
+        }
+    });
+    </script>
+  </body>
+</html>

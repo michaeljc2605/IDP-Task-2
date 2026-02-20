@@ -1,0 +1,50 @@
+/* Footer styles that reuse global variables */
+.site-footer-inner {
+  background: linear-gradient(180deg, #fafbfc, #ffffff);
+  border-top: 1px solid var(--border);
+  padding: var(--space-lg) 0;
+  color: var(--text-secondary);
+}
+.footer-content {
+  display: flex;
+  gap: var(--space-xl);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.footer-section { flex: 1; min-width: 180px; }
+.footer-section h4 { color: #000000; margin-bottom: var(--space-sm); }
+.footer-section ul { list-style: none; padding: 0; }
+.footer-section ul li { margin-bottom: var(--space-sm); }
+.footer-section a { color: var(--accent); }
+.footer-bottom { margin-top: var(--space-md); border-top: 1px solid var(--border); padding-top: var(--space-md); color: var(--text-light); text-align: center; }
+@media (max-width:900px){
+  .footer-content { flex-direction: column; gap: var(--space-md); }
+}
+
+/* Stronger selector to override site-wide footer link rules (e.g. in index.css) */
+.site-footer-inner .footer-section ul a,
+.site-footer-inner .footer-section a {
+  color: var(--accent) !important;
+}
+.site-footer-inner .footer-section ul a:hover,
+.site-footer-inner .footer-section a:hover {
+  color: var(--primary-dark) !important;
+}
+
+/* Force override of generic `.footer` rules used elsewhere (index.css) */
+.site-footer .site-footer-inner,
+.site-footer-inner.footer,
+.site-footer-inner {
+  background: linear-gradient(180deg, #fafbfc, #ffffff) !important;
+  color: var(--text-secondary) !important;
+}
+
+.site-footer .site-footer-inner a,
+.site-footer-inner a {
+  color: var(--accent) !important;
+}
+
+.site-footer .footer-bottom p,
+.site-footer-inner .footer-bottom p {
+  color: var(--text-light) !important;
+}

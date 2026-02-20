@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Staff Area — eBookshop</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+    <link rel="stylesheet" href="/css/footer.css">
+    <style>
+      .staff-root { max-width: 1000px; margin: 3rem auto; padding: var(--space-lg); }
+      .status { margin-top: var(--space-md); padding: var(--space-md); background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-md); }
+    </style>
+  </head>
+  <body>
+    <div class="site-navbar"></div>
+
+    <main class="staff-root">
+      <h1>Staff Dashboard</h1>
+      <p>You are inside the staff area.</p>
+
+      <div class="status" id="statusBox">Checking session...</div>
+
+      <div style="margin-top:var(--space-lg)">
+        <a href="/stafflogin.html" class="btn btn-outline">Go to Staff Login</a>
+      </div>
+    </main>
+
+    <div class="site-footer"></div>
+
+    <script src="/js/navbar-v2.js"></script>
+    <script src="/js/footer-v2.js"></script>
+    <script>
+      // simple check: GET /staff/login returns a simple message; use it to display status
+      (async function(){
+        try {
+          const resp = await fetch('/staff/login', { credentials: 'same-origin' });
+          const text = await resp.text();
+          const box = document.getElementById('statusBox');
+          if (resp.ok) {
+            box.textContent = 'Server response: ' + text.trim();
+          } else if (resp.status === 401) {
+            box.textContent = 'Not authenticated. ' + text.trim();
+          } else {
+            box.textContent = 'Status: ' + resp.status + '. ' + text.trim();
+          }
+        } catch (e) {
+          document.getElementById('statusBox').textContent = 'Error checking session: ' + e.message;
+        }
+      })();
+    </script>
+  </body>
+</html>

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Book Details - Premium Bookshop</title>
   <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/navbar.css">
   <link rel="stylesheet" href="/book/css/book.css">
 </head>
 <body>
@@ -14,33 +15,7 @@
   <!-- Animated Particles Background -->
   <div id="particles-container"></div>
   
-  <!-- Navigation -->
-  <nav class="book-nav">
-    <div class="nav-container">
-      <a href="/" class="nav-back">
-        <svg class="back-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path d="M19 12H5M12 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>Back to Library</span>
-      </a>
-      <div class="nav-actions">
-        <button class="icon-btn" id="theme-toggle" title="Toggle Theme">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <circle cx="12" cy="12" r="5" stroke-width="2"/>
-            <path d="M12 1v6m0 6v6M23 12h-6m-6 0H1" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </button>
-        <button class="icon-btn" id="share-btn" title="Share">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <circle cx="18" cy="5" r="3" stroke-width="2"/>
-            <circle cx="6" cy="12" r="3" stroke-width="2"/>
-            <circle cx="18" cy="19" r="3" stroke-width="2"/>
-            <path d="M8.59 13.51l6.83 3.98m-.01-10.98l-6.82 3.98" stroke-width="2"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-  </nav>
+  <div class="site-navbar"></div>
 
   <!-- Main Content -->
   <main class="book-page">
@@ -64,5 +39,9 @@
   <div class="reading-progress"></div>
 
   <script src="/book/js/book.js"></script>
+  <script src="/js/navbar-v2.js"></script>
+  <link rel="stylesheet" href="/css/footer.css">
+  <div class="site-footer"></div>
+  <script src="/js/footer-v2.js"></script>
 </body>
 </html>
