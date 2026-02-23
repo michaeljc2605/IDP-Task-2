@@ -2,16 +2,15 @@
    GLOBAL STYLES - Bookshop Theme
    =================================== */
 
-/* CSS Variables for consistent theming */
 :root {
   /* Colors */
   --primary: #2c3e50;
   --primary-dark: #1a252f;
-  --secondary: #e74c3c;
-  --accent: #3498db;
+  --secondary: #e74c3c;       /* kept for error/danger states only */
+  --accent: #134E4A;
   --success: #27ae60;
   --warning: #f39c12;
-  
+
   /* Neutrals */
   --bg-primary: #ffffff;
   --bg-secondary: #f8f9fa;
@@ -20,13 +19,13 @@
   --text-secondary: #7f8c8d;
   --text-light: #95a5a6;
   --border: #dee2e6;
-  
+
   /* Shadows */
   --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
   --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
   --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
   --shadow-xl: 0 20px 40px rgba(0,0,0,0.15);
-  
+
   /* Spacing */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
@@ -35,19 +34,19 @@
   --space-xl: 2rem;
   --space-2xl: 3rem;
   --space-3xl: 4rem;
-  
+
   /* Typography */
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   --font-serif: 'Georgia', 'Times New Roman', serif;
   --font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
-  
+
   /* Border Radius */
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
   --radius-full: 9999px;
-  
+
   /* Transitions */
   --transition-fast: 150ms ease-in-out;
   --transition-normal: 250ms ease-in-out;
@@ -164,7 +163,7 @@ nav {
 }
 
 .nav-logo:hover {
-  color: var(--secondary);
+  color: #134E4A;
 }
 
 .nav-links {
@@ -184,7 +183,7 @@ nav {
 
 .nav-links a:hover {
   background: var(--bg-secondary);
-  color: var(--accent);
+  color: #134E4A;
 }
 
 /* ===================================
@@ -204,37 +203,64 @@ nav {
   text-decoration: none;
 }
 
+/* Primary — filled teal */
 .btn-primary {
-  background: var(--accent);
-  color: white;
+  background: #134E4A;
+  color: #F8FAFC;
+  border-color: #134E4A;
 }
 
 .btn-primary:hover {
-  background: #2980b9;
+  background: #0f3d39;
+  color: #E5E7EB;
+  border-color: #0f3d39;
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
 
+/* Secondary — slightly lighter teal fill */
 .btn-secondary {
-  background: var(--secondary);
-  color: white;
+  background: #115E59;
+  color: #F8FAFC;
+  border-color: #115E59;
 }
 
 .btn-secondary:hover {
-  background: #c0392b;
+  background: #0d4a46;
+  color: #E5E7EB;
+  border-color: #0d4a46;
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
 
+/* Outline — transparent with teal border */
 .btn-outline {
   background: transparent;
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: #134E4A;
+  color: #134E4A;
 }
 
 .btn-outline:hover {
-  background: var(--accent);
-  color: white;
+  background: #134E4A;
+  color: #F8FAFC;
+  border-color: #134E4A;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Danger — kept red for destructive actions */
+.btn-danger {
+  background: transparent;
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+.btn-danger:hover {
+  background: #e74c3c;
+  color: #F8FAFC;
+  border-color: #e74c3c;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
 /* ===================================
@@ -322,8 +348,8 @@ nav {
 .form-select:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  border-color: #134E4A;
+  box-shadow: 0 0 0 3px rgba(19, 78, 74, 0.1);
 }
 
 /* Custom Checkbox Styling */
@@ -355,13 +381,13 @@ nav {
 }
 
 .checkbox-label:hover {
-  border-color: var(--accent);
-  background: rgba(52, 152, 219, 0.05);
+  border-color: #134E4A;
+  background: rgba(19, 78, 74, 0.05);
 }
 
 .checkbox-option input[type="checkbox"]:checked + .checkbox-label {
-  border-color: var(--accent);
-  background: rgba(52, 152, 219, 0.1);
+  border-color: #134E4A;
+  background: rgba(19, 78, 74, 0.1);
 }
 
 .checkbox-label::before {
@@ -380,9 +406,9 @@ nav {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
+  background: #134E4A;
+  color: #F8FAFC;
+  border-color: #134E4A;
   font-weight: bold;
   font-size: 0.9rem;
 }
@@ -434,6 +460,11 @@ nav {
   color: white;
 }
 
+.badge-teal {
+  background: #134E4A;
+  color: #F8FAFC;
+}
+
 /* ===================================
    UTILITIES
    =================================== */
@@ -474,11 +505,11 @@ nav {
   html {
     font-size: 14px;
   }
-  
+
   .nav-links {
     gap: var(--space-md);
   }
-  
+
   h1 { font-size: 2rem; }
   h2 { font-size: 1.75rem; }
   h3 { font-size: 1.5rem; }
@@ -489,14 +520,8 @@ nav {
    =================================== */
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .fade-in {
@@ -504,12 +529,8 @@ nav {
 }
 
 @keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
 }
 
 .loading {
@@ -517,86 +538,62 @@ nav {
 }
 
 @keyframes slideUp {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-20px); }
 }
 
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 /* ===================================
    ADDITIONAL UTILITIES
    =================================== */
 
-/* Display utilities */
 .hidden { display: none !important; }
 .block { display: block; }
 .inline { display: inline; }
 .inline-block { display: inline-block; }
 
-/* Overflow utilities */
 .overflow-hidden { overflow: hidden; }
 .overflow-auto { overflow: auto; }
 .overflow-scroll { overflow: scroll; }
 
-/* Position utilities */
 .relative { position: relative; }
 .absolute { position: absolute; }
 .fixed { position: fixed; }
 .sticky { position: sticky; }
 
-/* Width utilities */
 .w-full { width: 100%; }
 .w-auto { width: auto; }
 .max-w-full { max-width: 100%; }
 
-/* Height utilities */
 .h-full { height: 100%; }
 .h-auto { height: auto; }
 .min-h-screen { min-height: 100vh; }
 
-/* Cursor utilities */
 .cursor-pointer { cursor: pointer; }
 .cursor-default { cursor: default; }
 .cursor-not-allowed { cursor: not-allowed; }
 
-/* User select utilities */
 .select-none { user-select: none; }
 .select-all { user-select: all; }
 .select-text { user-select: text; }
 
-/* Pointer events */
 .pointer-events-none { pointer-events: none; }
 .pointer-events-auto { pointer-events: auto; }
 
-/* Opacity utilities */
 .opacity-0 { opacity: 0; }
 .opacity-25 { opacity: 0.25; }
 .opacity-50 { opacity: 0.5; }
 .opacity-75 { opacity: 0.75; }
 .opacity-100 { opacity: 1; }
 
-/* Z-index utilities */
 .z-0 { z-index: 0; }
 .z-10 { z-index: 10; }
 .z-20 { z-index: 20; }
@@ -605,7 +602,6 @@ nav {
 .z-50 { z-index: 50; }
 .z-auto { z-index: auto; }
 
-/* Border utilities */
 .border { border: 1px solid var(--border); }
 .border-0 { border: 0; }
 .border-t { border-top: 1px solid var(--border); }
@@ -613,7 +609,6 @@ nav {
 .border-l { border-left: 1px solid var(--border); }
 .border-r { border-right: 1px solid var(--border); }
 
-/* Rounded utilities */
 .rounded { border-radius: var(--radius-md); }
 .rounded-sm { border-radius: var(--radius-sm); }
 .rounded-lg { border-radius: var(--radius-lg); }

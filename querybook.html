@@ -4,99 +4,119 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Books - eBookshop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/navbar.css">
-    <link rel="stylesheet" href="css/querybook.css">
+    <link rel="stylesheet" href="css/footer.css">
 </head>
-<body>
+<body class="bg-gray-50 min-h-screen flex flex-col">
     <div class="site-navbar"></div>
-    <div class="search-container">
-        <div class="search-card">
-            <div class="search-header">
-                <div class="search-icon">🔍</div>
-                <h1>Search Books by Author</h1>
-                <p>Select one or more authors to find their books</p>
-            </div>
 
-            <form method="get" action="query" class="search-form" id="searchForm">
-                <div class="form-section">
-                    <div class="form-section-title">📚 Choose Authors</div>
-                    <div class="selection-count" id="selectionCount">
-                        No authors selected
+    <main class="flex-grow max-w-4xl mx-auto w-full px-6 py-12">
+
+        <!-- Header -->
+        <div class="text-center mb-10">
+            <div class="text-5xl mb-4">🔍</div>
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">Search Books by Author</h1>
+            <p class="text-gray-500">Select one or more authors to find their books</p>
+        </div>
+
+        <!-- Search Card -->
+        <div class="bg-white rounded-2xl shadow-md p-8 mb-6">
+
+            <form method="get" action="query" id="searchForm">
+
+                <!-- Author Grid -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-gray-700">📚 Choose Authors</h2>
+                        <span id="selectionCount" class="text-sm text-gray-400">No authors selected</span>
                     </div>
-                    <div class="author-grid">
-                        <div class="checkbox-option">
-                            <input type="checkbox" name="author" value="Charles Dickens" id="author1">
-                            <label for="author1" class="checkbox-label">
-                                <span class="author-name">Charles Dickens</span>
-                            </label>
-                        </div>
-                        <div class="checkbox-option">
-                            <input type="checkbox" name="author" value="F. Scott Fitzgerald" id="author2">
-                            <label for="author2" class="checkbox-label">
-                                <span class="author-name">F. Scott Fitzgerald</span>
-                            </label>
-                        </div>
-                        <div class="checkbox-option">
-                            <input type="checkbox" name="author" value="Harper Lee" id="author3">
-                            <label for="author3" class="checkbox-label">
-                                <span class="author-name">Harper Lee</span>
-                            </label>
-                        </div>
-                        <div class="checkbox-option">
-                            <input type="checkbox" name="author" value="George Orwell" id="author4">
-                            <label for="author4" class="checkbox-label">
-                                <span class="author-name">George Orwell</span>
-                            </label>
-                        </div>
-                        <div class="checkbox-option">
-                            <input type="checkbox" name="author" value="Jane Austen" id="author5">
-                            <label for="author5" class="checkbox-label">
-                                <span class="author-name">Jane Austen</span>
-                            </label>
-                        </div>
-                        <div class="checkbox-option">
-                            <input type="checkbox" name="author" value="J.D. Salinger" id="author6">
-                            <label for="author6" class="checkbox-label">
-                                <span class="author-name">J.D. Salinger</span>
-                            </label>
-                        </div>
-                        <div class="checkbox-option">
-                            <input type="checkbox" name="author" value="Herman Melville" id="author7">
-                            <label for="author7" class="checkbox-label">
-                                <span class="author-name">Herman Melville</span>
-                            </label>
-                        </div>
-                        <div class="checkbox-option">
-                            <input type="checkbox" name="author" value="Leo Tolstoy" id="author8">
-                            <label for="author8" class="checkbox-label">
-                                <span class="author-name">Leo Tolstoy</span>
-                            </label>
-                        </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <label class="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-teal-500 hover:bg-teal-50 transition has-[:checked]:border-teal-600 has-[:checked]:bg-teal-50">
+                            <input type="checkbox" name="author" value="Charles Dickens" id="author1" class="w-4 h-4 accent-teal-700">
+                            <span class="text-sm font-medium text-gray-700">Charles Dickens</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-teal-500 hover:bg-teal-50 transition has-[:checked]:border-teal-600 has-[:checked]:bg-teal-50">
+                            <input type="checkbox" name="author" value="F. Scott Fitzgerald" id="author2" class="w-4 h-4 accent-teal-700">
+                            <span class="text-sm font-medium text-gray-700">F. Scott Fitzgerald</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-teal-500 hover:bg-teal-50 transition has-[:checked]:border-teal-600 has-[:checked]:bg-teal-50">
+                            <input type="checkbox" name="author" value="Harper Lee" id="author3" class="w-4 h-4 accent-teal-700">
+                            <span class="text-sm font-medium text-gray-700">Harper Lee</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-teal-500 hover:bg-teal-50 transition has-[:checked]:border-teal-600 has-[:checked]:bg-teal-50">
+                            <input type="checkbox" name="author" value="George Orwell" id="author4" class="w-4 h-4 accent-teal-700">
+                            <span class="text-sm font-medium text-gray-700">George Orwell</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-teal-500 hover:bg-teal-50 transition has-[:checked]:border-teal-600 has-[:checked]:bg-teal-50">
+                            <input type="checkbox" name="author" value="Jane Austen" id="author5" class="w-4 h-4 accent-teal-700">
+                            <span class="text-sm font-medium text-gray-700">Jane Austen</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-teal-500 hover:bg-teal-50 transition has-[:checked]:border-teal-600 has-[:checked]:bg-teal-50">
+                            <input type="checkbox" name="author" value="J.D. Salinger" id="author6" class="w-4 h-4 accent-teal-700">
+                            <span class="text-sm font-medium text-gray-700">J.D. Salinger</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-teal-500 hover:bg-teal-50 transition has-[:checked]:border-teal-600 has-[:checked]:bg-teal-50">
+                            <input type="checkbox" name="author" value="Herman Melville" id="author7" class="w-4 h-4 accent-teal-700">
+                            <span class="text-sm font-medium text-gray-700">Herman Melville</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-teal-500 hover:bg-teal-50 transition has-[:checked]:border-teal-600 has-[:checked]:bg-teal-50">
+                            <input type="checkbox" name="author" value="Leo Tolstoy" id="author8" class="w-4 h-4 accent-teal-700">
+                            <span class="text-sm font-medium text-gray-700">Leo Tolstoy</span>
+                        </label>
                     </div>
                 </div>
 
-                <div class="search-actions">
-                    <button type="submit" class="btn-search">🔍 Search Books</button>
-                    <button type="button" class="btn-reset" id="resetBtn">↺ Clear All</button>
+                <!-- Buttons -->
+                <div class="flex gap-3">
+                    <button type="submit"
+                        class="flex-1 py-3 rounded-xl font-semibold transition flex items-center justify-center gap-2"
+                        style="background:#115E59; color:#F8FAFC;"
+                        onmouseover="this.style.background='#0d4a45'"
+                        onmouseout="this.style.background='#115E59'">
+                        🔍 Search Books
+                    </button>
+                    <button type="button" id="resetBtn"
+                        class="px-6 border-2 border-gray-300 text-gray-600 hover:bg-gray-100 py-3 rounded-xl font-medium transition">
+                        ↺ Clear All
+                    </button>
                 </div>
             </form>
-
-            <!-- Results will be injected here -->
-            <div id="results" class="search-results" aria-live="polite"></div>
-
-            <div class="back-link">
-                <a href="/">
-                    <span>←</span>
-                    <span>Back to Home</span>
-                </a>
-            </div>
         </div>
-    </div>
-    <script src="js/navbar-v2.js"></script>
-    <script src="js/querybook.js"></script>
-    <link rel="stylesheet" href="css/footer.css">
+
+        <!-- Results -->
+        <div id="results" aria-live="polite"></div>
+
+        <!-- Back Link -->
+        <div class="text-center mt-6">
+            <a href="/" class="text-sm text-gray-400 hover:text-teal-600 transition">← Back to Home</a>
+        </div>
+
+    </main>
+
     <div class="site-footer"></div>
+    <script src="js/navbar-v2.js"></script>
     <script src="js/footer-v2.js"></script>
+    <script src="js/querybook.js"></script>
+    <script>
+        const checkboxes = document.querySelectorAll('input[name="author"]');
+        const countEl = document.getElementById('selectionCount');
+        const resetBtn = document.getElementById('resetBtn');
+
+        function updateCount() {
+            const checked = document.querySelectorAll('input[name="author"]:checked').length;
+            countEl.textContent = checked === 0 ? 'No authors selected' : `${checked} author${checked > 1 ? 's' : ''} selected`;
+        }
+
+        checkboxes.forEach(cb => cb.addEventListener('change', updateCount));
+
+        resetBtn.addEventListener('click', () => {
+            checkboxes.forEach(cb => cb.checked = false);
+            updateCount();
+            document.getElementById('results').innerHTML = '';
+        });
+    </script>
 </body>
 </html>

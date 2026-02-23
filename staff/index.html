@@ -8,41 +8,140 @@
     <link rel="stylesheet" href="/css/navbar.css">
     <link rel="stylesheet" href="/css/footer.css">
     <style>
-      .staff-root { max-width: 1000px; margin: 3rem auto; padding: var(--space-lg); }
-      .status { margin-top: var(--space-md); padding: var(--space-md); background: var(--bg-primary); border: 1px solid var(--border); border-radius: var(--radius-md); }
+      .staff-root {
+        max-width: 900px;
+        margin: 3rem auto;
+        padding: var(--space-lg);
+      }
+
+      .staff-header {
+        margin-bottom: var(--space-2xl);
+      }
+
+      .staff-header h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #134E4A;
+        margin-bottom: var(--space-xs);
+      }
+
+      .staff-header p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin: 0;
+      }
+
+      /* Functions grid */
+      .functions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: var(--space-lg);
+      }
+
+      .fn-card {
+        background: #ffffff;
+        border: 1px solid #e2e8e8;
+        border-radius: var(--radius-lg);
+        padding: var(--space-xl) var(--space-lg);
+        text-align: center;
+        text-decoration: none;
+        color: inherit;
+        transition: all 200ms ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-md);
+      }
+
+      .fn-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(19,78,74,0.12);
+        border-color: #134E4A;
+        color: inherit;
+      }
+
+      .fn-card .fn-icon {
+        width: 52px;
+        height: 52px;
+        background: rgba(19,78,74,0.08);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+      }
+
+      .fn-card .fn-label {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #134E4A;
+      }
+
+      .fn-card .fn-desc {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin: 0;
+        line-height: 1.4;
+      }
+
+      /* Status box */
+      .status {
+        margin-top: var(--space-2xl);
+        padding: var(--space-md) var(--space-lg);
+        background: rgba(19,78,74,0.04);
+        border: 1px solid rgba(19,78,74,0.15);
+        border-radius: var(--radius-md);
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+      }
+
+      .logout-row {
+        margin-top: var(--space-xl);
+      }
     </style>
   </head>
   <body>
     <div class="site-navbar"></div>
 
     <main class="staff-root">
-      <h1>Staff Dashboard</h1>
-      <p>You are inside the staff area.</p>
+      <div class="staff-header">
+        <h1>Staff Dashboard</h1>
+        <p>Welcome back. Select a section below to get started.</p>
+      </div>
 
-      <div class="status" id="statusBox">Checking session...</div>
+      <!-- Function Cards -->
+      <div class="functions-grid">
+        <a href="/staff/orders.html" class="fn-card">
+          <div class="fn-icon">📋</div>
+          <span class="fn-label">Orders List</span>
+          <p class="fn-desc">View and manage all customer orders</p>
+        </a>
+        <!-- future cards can be added here -->
+      </div>
 
-      <div style="margin-top:var(--space-lg)">
-        <a href="/stafflogin.html" class="btn btn-outline">Go to Staff Login</a>
+      <div class="status" id="statusBox">Checking session…</div>
+
+      <div class="logout-row">
+        <a href="/stafflogin.html" class="btn btn-outline">← Back to Login</a>
       </div>
     </main>
 
     <div class="site-footer"></div>
-
     <script src="/js/navbar-v2.js"></script>
     <script src="/js/footer-v2.js"></script>
     <script>
-      // simple check: GET /staff/login returns a simple message; use it to display status
-      (async function(){
+      (async function () {
         try {
           const resp = await fetch('/staff/login', { credentials: 'same-origin' });
           const text = await resp.text();
-          const box = document.getElementById('statusBox');
+          const box  = document.getElementById('statusBox');
           if (resp.ok) {
-            box.textContent = 'Server response: ' + text.trim();
+            box.textContent = '✓ Session active: ' + text.trim();
           } else if (resp.status === 401) {
-            box.textContent = 'Not authenticated. ' + text.trim();
+            box.textContent = '⚠ Not authenticated. ' + text.trim();
           } else {
-            box.textContent = 'Status: ' + resp.status + '. ' + text.trim();
+            box.textContent = 'Status ' + resp.status + ': ' + text.trim();
           }
         } catch (e) {
           document.getElementById('statusBox').textContent = 'Error checking session: ' + e.message;

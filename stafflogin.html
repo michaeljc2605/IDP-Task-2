@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Staff Login — eBookshop</title>
-    <!-- Tailwind CDN for quick styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/css/navbar.css">
@@ -19,14 +18,27 @@
         <form id="staffLoginForm" action="/staff/login" method="post" class="space-y-4">
           <div>
             <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-            <input id="username" name="username" type="text" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <input id="username" name="username" type="text" required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none"
+              style="--tw-ring-color: #134E4A;"
+              onfocus="this.style.borderColor='#134E4A'; this.style.boxShadow='0 0 0 2px rgba(19,78,74,0.2)';"
+              onblur="this.style.borderColor=''; this.style.boxShadow='';" />
           </div>
           <div>
             <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-            <input id="password" name="password" type="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <input id="password" name="password" type="password" required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none"
+              onfocus="this.style.borderColor='#134E4A'; this.style.boxShadow='0 0 0 2px rgba(19,78,74,0.2)';"
+              onblur="this.style.borderColor=''; this.style.boxShadow='';" />
           </div>
-          <div class="flex items-center justify-between">
-            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700">Sign in</button>
+          <div>
+            <button type="submit"
+              class="w-full py-2 rounded-md font-medium transition"
+              style="background-color:#134E4A; color:#F8FAFC;"
+              onmouseover="this.style.backgroundColor='#0f3d39'; this.style.color='#E5E7EB';"
+              onmouseout="this.style.backgroundColor='#134E4A'; this.style.color='#F8FAFC';">
+              Sign in
+            </button>
           </div>
         </form>
       </div>
@@ -36,23 +48,23 @@
     <script src="/js/navbar-v2.js"></script>
     <script src="/js/footer-v2.js"></script>
     <script>
-    document.getElementById('staffLoginForm').addEventListener('submit', async function(e) {
+      document.getElementById('staffLoginForm').addEventListener('submit', async function(e) {
         e.preventDefault();
 
         const formData = new FormData(this);
 
         const resp = await fetch('/staff/login', {
-        method: 'POST',
-        body: new URLSearchParams(formData)
+          method: 'POST',
+          body: new URLSearchParams(formData)
         });
 
         if (resp.ok) {
-        window.location.href = '/staff/index.html';
+          window.location.href = '/staff/index.html';
         } else {
-        const msg = await resp.text();
-        alert('Login failed: ' + msg);
+          const msg = await resp.text();
+          alert('Login failed: ' + msg);
         }
-    });
+      });
     </script>
   </body>
 </html>
