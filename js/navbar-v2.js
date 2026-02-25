@@ -72,6 +72,16 @@
         toggle.focus();
       }
     });
+
+    // wire close button inside mobile header
+    const closeBtn = root.querySelector('.nav-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        linksEl.classList.remove('show');
+        toggle.setAttribute('aria-expanded','false');
+        toggle.focus();
+      });
+    }
   }
 
   async function init(){

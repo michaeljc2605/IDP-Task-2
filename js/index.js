@@ -153,6 +153,7 @@ function createBookCard(book, index) {
     const stockStatus = getStockStatus(book.qty);
     const stockClass = stockStatus.class;
     const stockText = stockStatus.text;
+    const isSoldOut = book.qty === 0;
     
     card.innerHTML = `
         <div class="book-cover">
@@ -165,6 +166,10 @@ function createBookCard(book, index) {
             <div class="book-cover-fallback" style="display:none; background: ${getRandomGradient()}">
                 <div class="book-icon">📖</div>
             </div>
+            ${isSoldOut ? `
+            <div class="sold-out-overlay">
+                <span class="sold-out-text">SOLD OUT</span>
+            </div>` : ''}
         </div>
         <div class="book-info">
             <h3 class="book-title">${escapeHtml(book.title)}</h3>
@@ -176,7 +181,7 @@ function createBookCard(book, index) {
                     <span>${stockText}</span>
                 </div>
                 <div class="book-actions">
-                    <button class="btn btn-primary" onclick="addToCart(${book.id})">Add to Cart</button>
+                    <button class="btn btn-primary" onclick="addToCart(${book.id})" ${isSoldOut ? 'disabled' : ''}>${isSoldOut ? 'Sold Out' : 'Add to Cart'}</button>
                     <a class="btn btn-outline" href="/book/${book.id}">Details</a>
                 </div>
             </div>
@@ -236,7 +241,7 @@ function showError() {
 // Add to cart function
 function addToCart(bookId) {
     const book = allBooks.find(b => b.id === bookId);
-    if (!book) return;
+    if (!book || book.qty === 0) return;
 
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const existing = cart.find(item => item.id === bookId);
