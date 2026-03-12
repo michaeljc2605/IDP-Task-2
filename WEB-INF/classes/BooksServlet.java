@@ -11,7 +11,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+// This servlet provides a list of all books at /api/books
 @WebServlet("/api/books")
 public class BooksServlet extends HttpServlet {
 
@@ -59,7 +59,7 @@ public class BooksServlet extends HttpServlet {
          out.print("{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
          ex.printStackTrace();
       }
- 
+
       out.close();
    }
    
@@ -67,9 +67,9 @@ public class BooksServlet extends HttpServlet {
    private String escapeJson(String str) {
       if (str == null) return "";
       return str.replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r")
-                .replace("\t", "\\t");
+               .replace("\"", "\\\"")
+               .replace("\n", "\\n")
+               .replace("\r", "\\r")
+               .replace("\t", "\\t");
    }
 }

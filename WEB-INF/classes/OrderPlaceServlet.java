@@ -11,7 +11,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+// This servlet handles placing an order at /api/orders/place
 @WebServlet("/api/orders/place")
 public class OrderPlaceServlet extends HttpServlet {
 

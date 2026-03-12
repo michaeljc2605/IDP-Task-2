@@ -2,8 +2,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import jakarta.servlet.ServletException;
@@ -11,7 +11,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+// This servlet provides book details by ID at /api/books/{id}
 @WebServlet("/api/books/*")
 public class BookServlet extends HttpServlet {
     @Override
@@ -21,7 +21,6 @@ public class BookServlet extends HttpServlet {
         PrintWriter out = resp.getWriter();
         String path = req.getPathInfo(); // /{id}
         if (path == null || path.equals("/") ) {
-            // TODO: could list all books; for now return empty array
             out.println("[]");
             return;
         }
@@ -52,7 +51,7 @@ public class BookServlet extends HttpServlet {
                             json.append(",\"description\":\"").append(escapeJson(desc)).append("\"");
                         }
                     } catch (Exception e) {
-                        // ignore - description column may not exist
+                        // ignore if column doesn't exist or other error
                     }
 
                     json.append("}");
