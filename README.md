@@ -1,488 +1,213 @@
-# 📚 eBookshop - Java Servlet Web Application
+# 📚 GM eBookshop
 
-A modern, full-stack bookshop web application built with Java Servlets, MySQL, and vanilla JavaScript. Features a beautiful responsive UI with real-time filtering, sorting, and dynamic content loading.
-
-![eBookshop](https://img.shields.io/badge/Java-Servlets-orange) ![MySQL](https://img.shields.io/badge/Database-MySQL-blue) ![Tomcat](https://img.shields.io/badge/Server-Tomcat%2010-yellow)
+> A full-stack bookshop web application built with Java Servlets, MySQL, and vanilla JavaScript — designed, developed, and shipped solo in a few weeks with the help of Jiulixiang and 2 cups of coffee ☕☕
 
 ---
 
-## 🎯 Features
+## ✨ Features
 
-- **Dynamic Book Catalog** - Browse books with real-time filtering and sorting
-- **Advanced Search** - Search books by author with instant results
-- **Responsive Design** - Beautiful UI that works on all devices
-- **RESTful API** - JSON API for book data
-- **Database Integration** - MySQL backend with connection pooling
-- **Modern Frontend** - Vanilla JavaScript with smooth animations
-
----
-
-## 🛠️ Technology Stack
-
-| Layer | Technology |
-|-------|------------|
-| **Backend** | Java Servlets (Jakarta EE) |
-| **Database** | MySQL 8.0+ |
-| **Server** | Apache Tomcat 10 |
-| **Frontend** | HTML5, CSS3, Vanilla JavaScript |
-| **Styling** | Custom CSS with CSS Variables |
+| Feature | Description |
+|---|---|
+| 📖 Book Catalog | Dynamic grid with real-time filtering, sorting, and search |
+| 🔍 Author Search | Multi-author checkbox search with instant in-page results |
+| 🛒 Shopping Cart | localStorage-based cart with quantity controls |
+| 📦 Order Management | Transactional order placement with stock decrement |
+| 🔐 Staff Portal | BCrypt-authenticated staff login and order dashboard |
+| 📱 Responsive UI | Mobile-friendly design with sticky navbar and component injection |
 
 ---
 
-## 📁 Project Structure
+## 🛠️ Tech Stack
+
+```
+Backend   →  Java Servlets (Jakarta EE 10)
+Database  →  MySQL 8.0+
+Server    →  Apache Tomcat 10  (port 9999)
+Frontend  →  HTML5 · CSS3 · Vanilla JavaScript
+Security  →  BCrypt via jbcrypt-0.4.jar
+Styling   →  Custom CSS with #115E59 teal theme
+```
+
+---
+
+## 🗂️ Project Structure
 
 ```
 ROOT/
-├── index.html                 # Main page - Book catalog
-├── querybook.html            # Search page
+├── index.html                  # Book catalog (home page)
+├── querybook.html              # Author search
+├── cart.html                   # Shopping cart + checkout
+├── aboutus.html                # About GM eBookshop
+├── stafflogin.html             # Staff login
+│
 ├── css/
-│   ├── global.css           # Global styles & design system
-│   └── index.css            # Main page specific styles
+│   ├── global.css              # Design system + CSS variables
+│   ├── navbar.css              # Navbar (teal theme)
+│   ├── footer.css              # Footer (teal theme)
+│   └── index.css               # Home page styles
+│
 ├── js/
-│   └── index.js             # Client-side logic
-├── WEB-INF/
-│   ├── classes/
-│   │   ├── BooksServlet.class    # API endpoint for all books
-│   │   └── QueryServlet.class    # Search servlet
-│   └── web.xml              # Deployment descriptor (optional)
-└── README.md
+│   ├── index.js                # Book grid, filters, add to cart
+│   ├── querybook.js            # Author search logic
+│   ├── navbar-v2.js            # Navbar injection + cart badge
+│   └── footer-v2.js            # Footer injection
+│
+├── static/
+│   ├── bookpage/{id}.jpg       # Book cover images
+│   ├── bannervideo1.mp4        # Hero background video
+│   ├── profile.jpg             # Team photo
+│   └── office.jpg              # Office photo
+│
+├── components/
+│   └── navbar.html             # Shared navbar fragment
+│
+└── WEB-INF/
+    ├── classes/                # Compiled servlet .java + .class files
+    ├── lib/
+    │   └── jbcrypt-0.4.jar     # BCrypt password hashing
+    └── book/
+        └── index.html          # Protected book detail page ⚠️
+```
+
+> **Why is `book/index.html` inside `WEB-INF`?**
+> Files inside `WEB-INF` cannot be accessed directly via browser URL — Tomcat blocks all direct HTTP access to this folder. This means users **must** go through `BookPageServlet` to reach the book detail page, preventing URL bypasses and routing loops from the `@WebServlet("/book/*")` wildcard mapping. It also enforces the MVC pattern: the servlet is the controller, and the HTML is the view.
+
+---
+
+## 🔌 API Endpoints
+
+| Endpoint | Method | Servlet | Description |
+|---|---|---|---|
+| `/api/books` | GET | `BooksServlet` | All books as JSON array |
+| `/api/books/{id}` | GET | `BookServlet` | Single book by ID |
+| `/book/{id}` | GET | `BookPageServlet` | Book detail page |
+| `/query` | GET | `QueryServlet` | Search by author (`?author=...&format=json`) |
+| `/api/orders/place` | POST | `OrderPlaceServlet` | Place order + decrement stock |
+| `/api/orders` | GET | `OrderTableServlet` | All orders (staff) |
+| `/staff/login` | POST | `StaffAuthServlet` | Staff login / register |
+| `/staff/session` | GET | `StaffSessionServlet` | Check staff session |
+
+---
+
+## 🗄️ Database Schema
+
+### `books`
+```sql
+id          INT          PRIMARY KEY
+title       VARCHAR(255) NOT NULL
+author      VARCHAR(255) NOT NULL
+price       FLOAT        NOT NULL
+qty         INT          NOT NULL
+description TEXT
+```
+
+### `order_records`
+```sql
+id          INT           AUTO_INCREMENT PRIMARY KEY
+qty_ordered INT           NOT NULL
+cust_name   VARCHAR(30)   NOT NULL
+cust_email  VARCHAR(30)   NOT NULL
+cust_phone  CHAR(8)       NOT NULL
+book_id     INT
+book_title  VARCHAR(255)
+total_price DECIMAL(10,2)
+```
+
+### `users`
+```sql
+id            INT          AUTO_INCREMENT PRIMARY KEY
+username      VARCHAR(50)  UNIQUE NOT NULL
+password_hash VARCHAR(255) NOT NULL
+created_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
 ```
 
 ---
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### 1. Start MySQL
 
-- **Java JDK 11+** (for Jakarta EE)
-- **Apache Tomcat 10** 
-- **MySQL 8.0+**
-- **macOS** (instructions are Mac-specific)
-
-### Installation
-
-#### 1️⃣ Setup MySQL Database
-
-Start MySQL if not already running:
 ```bash
-# Check MySQL status
-sudo /usr/local/mysql/support-files/mysql.server status
-
-# Start MySQL
 sudo /usr/local/mysql/support-files/mysql.server start
-```
-
-Create the database and tables:
-```bash
-# Connect to MySQL
 /usr/local/mysql/bin/mysql -u root
-
-# Run these SQL commands:
 ```
+
+### 2. Create the Database
 
 ```sql
 CREATE DATABASE ebookshop;
 USE ebookshop;
-
-CREATE TABLE books (
-    id INT PRIMARY KEY,
-    title VARCHAR(50) NOT NULL,
-    author VARCHAR(50) NOT NULL,
-    price FLOAT NOT NULL,
-    qty INT NOT NULL
-);
-
-INSERT INTO books (id, title, author, price, qty) VALUES
-(1001, 'Java for dummies', 'Tan Ah Teck', 11.11, 11),
-(1002, 'More Java for dummies', 'Tan Ah Teck', 22.22, 22),
-(1003, 'More Java for more dummies', 'Mohammad Ali', 33.33, 33),
-(1004, 'A Cup of Java', 'Kumar', 44.44, 44),
-(1005, 'A Teaspoon of Java', 'Kevin Jones', 55.55, 55);
-
-CREATE TABLE order_records (
-    id INT PRIMARY KEY,
-    qty_ordered INT NOT NULL,
-    cust_name VARCHAR(30) NOT NULL,
-    cust_email VARCHAR(30) NOT NULL,
-    cust_phone CHAR(8) NOT NULL
-);
+-- Then run the full schema from Database/ebookshop.sql
 ```
 
-#### 2️⃣ Configure Tomcat
-
-**Important:** This application uses the **ROOT** context for cleaner URLs.
-
-```bash
-# Navigate to Tomcat webapps
-cd /path/to/tomcat/webapps
-
-# Backup original ROOT folder (optional)
-mv ROOT ROOT_backup
-
-# Create new ROOT directory
-mkdir ROOT
-```
-
-#### 3️⃣ Deploy Application Files
-
-Clone or download this repository, then copy files:
-
-```bash
-# Create directory structure
-cd /path/to/tomcat/webapps/ROOT
-mkdir -p css js WEB-INF/classes
-
-# Copy frontend files
-cp /path/to/project/index.html .
-cp /path/to/project/querybook.html .
-cp /path/to/project/css/* css/
-cp /path/to/project/js/* js/
-
-# Copy servlet source files
-cp /path/to/project/servlets/*.java WEB-INF/classes/
-```
-
-#### 4️⃣ Compile Servlets
+### 3. Compile Servlets
 
 ```bash
 cd /path/to/tomcat/webapps/ROOT/WEB-INF/classes
 
-# Compile both servlets
-javac -cp "/path/to/tomcat/lib/servlet-api.jar:/path/to/tomcat/lib/mysql-connector-j-8.3.0.jar" \
-    BooksServlet.java QueryServlet.java
-
-# Verify .class files were created
-ls -la *.class
+javac -cp "/path/to/tomcat/lib/servlet-api.jar:\
+  ../lib/jbcrypt-0.4.jar:\
+  /path/to/mysql-connector-j.jar:." \
+  *.java
 ```
 
-**Note:** Ensure MySQL Connector/J JAR is in Tomcat's `lib` directory. Download if needed:
+### 4. Start Tomcat
+
 ```bash
-cd /path/to/tomcat/lib
-curl -O https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar
+/path/to/tomcat/bin/shutdown.sh
+/path/to/tomcat/bin/startup.sh
 ```
 
-#### 5️⃣ Start Tomcat
+### 5. Open in Browser
 
-```bash
-cd /path/to/tomcat/bin
-./catalina.sh run
 ```
-
-#### 6️⃣ Access Application
-
-Open your browser and navigate to:
-- **Main Page:** http://localhost:9999/
-- **Search Page:** http://localhost:9999/querybook.html
-- **API Endpoint:** http://localhost:9999/api/books
-
----
-
-## 🔄 Migration Guide: `hello` → `ROOT`
-
-### Why ROOT?
-
-Originally, this app was in `/webapps/hello`, accessible at `http://localhost:9999/hello/`. 
-
-Moving to `/webapps/ROOT` provides:
-- ✅ Cleaner URLs: `http://localhost:9999/` instead of `http://localhost:9999/hello/`
-- ✅ Default application behavior
-- ✅ Professional deployment standard
-
-### Migration Steps
-
-```bash
-# 1. Stop Tomcat
-cd /path/to/tomcat/bin
-./catalina.sh stop
-
-# 2. Navigate to webapps
-cd /path/to/tomcat/webapps
-
-# 3. Backup existing ROOT (if it exists)
-mv ROOT ROOT_backup
-
-# 4. Rename hello to ROOT
-mv hello ROOT
-
-# 5. Start Tomcat
-cd ../bin
-./catalina.sh run
-```
-
-### Update Your Git Repository
-
-```bash
-cd /path/to/tomcat/webapps/ROOT
-
-# Your git repository is still intact!
-git status
-git add .
-git commit -m "Migrated from hello to ROOT context"
-git push origin main
+http://localhost:9999/
 ```
 
 ---
 
-## 🔌 Database Connection Changes
+## 🔐 Security Notes
 
-### Original Setup (Remote Database)
-
-```java
-// Old connection (unreachable remote server)
-Connection conn = DriverManager.getConnection(
-    "jdbc:mysql://10.91.138.41:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC",
-    "michael", "anjay88"
-);
-```
-
-### Updated Setup (Local Database)
-
-```java
-// New connection (local MySQL)
-Connection conn = DriverManager.getConnection(
-    "jdbc:mysql://localhost:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC",
-    "root", ""
-);
-```
-
-### Key Changes
-
-| Aspect | Before | After | Reason |
-|--------|--------|-------|--------|
-| **Host** | `10.91.138.41` | `localhost` | Remote server unreachable |
-| **Username** | `michael` | `root` | Local MySQL setup |
-| **Password** | `anjay88` | `` (empty) | Root user has no password |
-
-### Files Updated
-
-- ✅ `BooksServlet.java` - Line 22
-- ✅ `QueryServlet.java` - Line 28
-
----
-
-## 🧪 Testing
-
-### Test Database Connection
-
-```bash
-# Verify MySQL is accessible
-/usr/local/mysql/bin/mysql -u root -e "USE ebookshop; SELECT * FROM books;"
-```
-
-### Test API Endpoint
-
-```bash
-# Should return JSON array of books
-curl http://localhost:9999/api/books
-```
-
-### Test Main Page
-
-1. Go to http://localhost:9999/
-2. Verify books load in grid layout
-3. Test filtering by author
-4. Test sorting options
-
-### Test Search Functionality
-
-1. Go to http://localhost:9999/querybook.html
-2. Enter "Tan Ah Teck" as author
-3. Submit form
-4. Verify results display correctly
+- **Passwords** are hashed with BCrypt (`cost=12`) — never stored in plain text
+- **SQL injection** is prevented via `PreparedStatement` throughout
+- **Stock decrement** uses `SELECT ... FOR UPDATE` with transaction rollback to prevent race conditions
+- **Staff pages** check `/staff/session` on load and redirect to login if unauthorized
+- ⚠️ DB credentials are currently hard-coded — move to environment variables for production
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Books Not Loading (API 404 Error)
-
-**Problem:** `/api/books` returns 404
-
-**Solution:**
+**Books not loading (404)**
 ```bash
-# Check if BooksServlet.class exists
-ls -la /path/to/tomcat/webapps/ROOT/WEB-INF/classes/BooksServlet.class
-
-# If missing, recompile:
-cd /path/to/tomcat/webapps/ROOT/WEB-INF/classes
-javac -cp "/path/to/tomcat/lib/servlet-api.jar:/path/to/tomcat/lib/mysql-connector-j-*.jar" BooksServlet.java
-
-# Restart Tomcat
-cd /path/to/tomcat/bin
-./catalina.sh stop
-./catalina.sh run
+# Recompile servlets and restart Tomcat
+cd WEB-INF/classes && javac -cp ... *.java
 ```
 
-### Database Connection Error
-
-**Problem:** "Communications link failure" or "Access denied"
-
-**Solutions:**
-
-1. **Check MySQL is running:**
-   ```bash
-   sudo /usr/local/mysql/support-files/mysql.server status
-   ```
-
-2. **Test connection:**
-   ```bash
-   /usr/local/mysql/bin/mysql -u root
-   ```
-
-3. **Verify database exists:**
-   ```sql
-   SHOW DATABASES;
-   USE ebookshop;
-   SHOW TABLES;
-   ```
-
-### Port Already in Use
-
-**Problem:** Tomcat won't start, port 9999 in use
-
-**Solution:**
+**Database connection error**
 ```bash
-# Find and kill process using port 9999
+# Verify MySQL is running
+sudo /usr/local/mysql/support-files/mysql.server status
+```
+
+**Port 9999 already in use**
+```bash
 lsof -ti:9999 | xargs kill -9
-
-# Or change port in server.xml
 ```
 
-### Servlet Compilation Errors
-
-**Problem:** "cannot find symbol" errors
-
-**Solution:**
-```bash
-# Ensure MySQL connector is in lib/
-ls -la /path/to/tomcat/lib/mysql-connector-j-*.jar
-
-# If missing, download:
-cd /path/to/tomcat/lib
-curl -O https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar
+**Changes not reflecting in browser**
 ```
-
----
-
-## 📊 Database Schema
-
-### Books Table
-
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| `id` | INT | PRIMARY KEY | Unique book identifier |
-| `title` | VARCHAR(50) | NOT NULL | Book title |
-| `author` | VARCHAR(50) | NOT NULL | Author name |
-| `price` | FLOAT | NOT NULL | Book price |
-| `qty` | INT | NOT NULL | Stock quantity |
-
-### Order Records Table
-
-| Column | Type | Constraints | Description |
-|--------|------|-------------|-------------|
-| `id` | INT | PRIMARY KEY | Order ID |
-| `qty_ordered` | INT | NOT NULL | Quantity ordered |
-| `cust_name` | VARCHAR(30) | NOT NULL | Customer name |
-| `cust_email` | VARCHAR(30) | NOT NULL | Customer email |
-| `cust_phone` | CHAR(8) | NOT NULL | Customer phone |
-
----
-
-## 🎨 Design System
-
-The application uses a comprehensive CSS design system with:
-
-- **CSS Variables** for consistent theming
-- **Responsive Grid Layout** (auto-fit, minmax)
-- **Modern Color Palette** with gradients
-- **Smooth Animations** and transitions
-- **Mobile-First Design** approach
-
-Key design tokens:
-```css
---primary: #2c3e50;
---secondary: #e74c3c;
---accent: #3498db;
---font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', ...;
+Cmd + Shift + R  (hard refresh / clear cache)
 ```
-
----
-
-## 🔐 Security Considerations
-
-⚠️ **Note:** This is a learning project. For production use:
-
-- ✅ Use prepared statements to prevent SQL injection
-- ✅ Implement authentication and authorization
-- ✅ Use HTTPS for encrypted connections
-- ✅ Store database credentials in environment variables
-- ✅ Add input validation and sanitization
-- ✅ Implement CSRF protection
-
----
-
-## 📝 API Documentation
-
-### GET `/api/books`
-
-Returns all books in JSON format.
-
-**Response:**
-```json
-[
-  {
-    "id": 1001,
-    "title": "Java for dummies",
-    "author": "Tan Ah Teck",
-    "price": 11.11,
-    "qty": 11
-  },
-  ...
-]
-```
-
-### GET `/query?author=<author_name>`
-
-Search books by author.
-
-**Parameters:**
-- `author` (string) - Author name to search
-
-**Example:**
-```
-/query?author=Tan%20Ah%20Teck
-```
-
----
-
-## 🤝 Contributing
-
-This is an educational project. Feel free to fork and experiment!
-
----
-
-## 📄 License
-
-This project is for educational purposes.
 
 ---
 
 ## 👨‍💻 Author
 
 **Michael Joseph Candra**
-- GitHub: [@michaeljc2605](https://github.com/michaeljc2605)
+Built solo from scratch — database design, servlet backend, and frontend UI.
+GitHub: [@michaeljc2605](https://github.com/michaeljc2605)
 
 ---
 
-## 🙏 Acknowledgments
-
-- Java Servlet API documentation
-- MySQL documentation  
-- Apache Tomcat team
-- Modern web design principles
-
----
-
-**Last Updated:** February 13, 2026
-
-Made with ☕ and Java
+<p align="center">Made with ☕☕ and Java · February 2026</p>
