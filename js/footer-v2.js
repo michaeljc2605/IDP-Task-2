@@ -1,4 +1,3 @@
-// Footer injector (footer-v2): fetches components/footer.html and injects into `.site-footer` placeholders
 (function(){
   async function loadFooter(){
     const placeholders = document.querySelectorAll('.site-footer');

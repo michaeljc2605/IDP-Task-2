@@ -1,13 +1,5 @@
-/* ===================================
-   BOOK DETAIL PAGE - PREMIUM JAVASCRIPT
-   =================================== */
-
 (function() {
   'use strict';
-
-  // ===================================
-  // UTILITY FUNCTIONS
-  // ===================================
 
   function escapeHtml(text) {
     const div = document.createElement('div');

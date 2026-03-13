@@ -1,8 +1,3 @@
-// ===================================
-// INDEX PAGE JAVASCRIPT
-// ===================================
-
-// State management
 let allBooks = [];
 let filteredBooks = [];
 

@@ -1,7 +1,3 @@
-// ===================================
-// SEARCH PAGE JAVASCRIPT
-// ===================================
-
 document.addEventListener('DOMContentLoaded', function() {
     initSearchPage();
 });

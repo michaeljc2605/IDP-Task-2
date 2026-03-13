@@ -1,6 +1,3 @@
-// Enhanced navbar injector and behaviour (navbar-v2)
-// Builds on the original injector: fetches components/navbar.html and then wires mobile toggle and active link highlighting.
-
 (function(){
   async function fetchNavbarHtml(){
     try {
