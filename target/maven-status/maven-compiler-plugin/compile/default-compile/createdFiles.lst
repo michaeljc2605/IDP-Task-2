@@ -1,0 +1,8 @@
+BookPageServlet.class
+OrderPlaceServlet.class
+BookServlet.class
+StaffSessionServlet.class
+StaffAuthServlet.class
+QueryServlet.class
+OrderTableServlet.class
+BooksServlet.class
