@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet(urlPatterns = {"/staff/login"})
 public class StaffAuthServlet extends HttpServlet {
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("text/plain;charset=UTF-8");
@@ -28,18 +27,22 @@ public class StaffAuthServlet extends HttpServlet {
         req.setCharacterEncoding("UTF-8");
         String username = req.getParameter("username");
         String password = req.getParameter("password");
-
         resp.setContentType("text/plain;charset=UTF-8");
         if (username == null || password == null || username.isEmpty() || password.isEmpty()) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().println("Missing username or password");
             return;
         }
-
-        String dbUrl  = System.getenv("DB_URL")  != null ? System.getenv("DB_URL")  : "jdbc:mysql://localhost:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
+        String dbUrl = System.getenv("DB_URL") != null ? System.getenv("DB_URL") : "jdbc:mysql://localhost:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
         String dbUser = System.getenv("DB_USER") != null ? System.getenv("DB_USER") : "root";
         String dbPass = System.getenv("DB_PASS") != null ? System.getenv("DB_PASS") : "";
-
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            resp.setStatus(500);
+            resp.getWriter().println("MySQL driver not found");
+            return;
+        }
         try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass)) {
             String storedHash = null;
             try (PreparedStatement ps = conn.prepareStatement("SELECT password_hash FROM users WHERE username = ?")) {
@@ -48,20 +51,15 @@ public class StaffAuthServlet extends HttpServlet {
                     if (rs.next()) storedHash = rs.getString(1);
                 }
             }
-
             if (storedHash == null) {
                 resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 resp.getWriter().println("Invalid username or password");
                 return;
             }
-
             boolean ok = false;
             try {
                 ok = org.mindrot.jbcrypt.BCrypt.checkpw(password, storedHash);
-            } catch (Exception ex) {
-                ok = false;
-            }
-
+            } catch (Exception ex) { ok = false; }
             if (ok) {
                 req.getSession(true).setAttribute("staff.user", username);
                 resp.getWriter().println("Login successful");
@@ -69,7 +67,6 @@ public class StaffAuthServlet extends HttpServlet {
                 resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 resp.getWriter().println("Invalid username or password");
             }
-
         } catch (SQLException e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().println("Database error: " + e.getMessage());

@@ -13,24 +13,26 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet("/api/orders")
 public class OrderTableServlet extends HttpServlet {
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
         PrintWriter out = resp.getWriter();
-
-        String dbUrl  = System.getenv("DB_URL")  != null ? System.getenv("DB_URL")  : "jdbc:mysql://localhost:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
+        String dbUrl = System.getenv("DB_URL") != null ? System.getenv("DB_URL") : "jdbc:mysql://localhost:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
         String dbUser = System.getenv("DB_USER") != null ? System.getenv("DB_USER") : "root";
         String dbPass = System.getenv("DB_PASS") != null ? System.getenv("DB_PASS") : "";
-
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            resp.setStatus(500);
+            out.print("[]");
+            return;
+        }
         try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
              Statement stmt = conn.createStatement()) {
-
             ResultSet rs = stmt.executeQuery("SELECT * FROM order_records ORDER BY id DESC");
             StringBuilder json = new StringBuilder("[");
             boolean first = true;
-
             while (rs.next()) {
                 if (!first) json.append(",");
                 first = false;
@@ -44,10 +46,8 @@ public class OrderTableServlet extends HttpServlet {
                 json.append("\"total_price\":").append(rs.getDouble("total_price"));
                 json.append("}");
             }
-
             json.append("]");
             out.print(json.toString());
-
         } catch (SQLException e) {
             resp.setStatus(500);
             out.print("[]");

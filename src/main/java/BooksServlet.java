@@ -21,13 +21,19 @@ public class BooksServlet extends HttpServlet {
         String dbUrl = System.getenv("DB_URL") != null ? System.getenv("DB_URL") : "jdbc:mysql://localhost:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
         String dbUser = System.getenv("DB_USER") != null ? System.getenv("DB_USER") : "root";
         String dbPass = System.getenv("DB_PASS") != null ? System.getenv("DB_PASS") : "";
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            response.setStatus(500);
+            out.print("{\"error\":\"MySQL driver not found\"}");
+            return;
+        }
         try (
             Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
             Statement stmt = conn.createStatement();
         ) {
             ResultSet rset = stmt.executeQuery("SELECT * FROM books ORDER BY title");
-            StringBuilder json = new StringBuilder();
-            json.append("[");
+            StringBuilder json = new StringBuilder("[");
             boolean first = true;
             while (rset.next()) {
                 if (!first) json.append(",");

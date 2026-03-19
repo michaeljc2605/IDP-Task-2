@@ -13,43 +13,44 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet("/api/orders/place")
 public class OrderPlaceServlet extends HttpServlet {
-
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
         PrintWriter out = resp.getWriter();
-
-        String custName   = req.getParameter("cust_name");
-        String custEmail  = req.getParameter("cust_email");
-        String custPhone  = req.getParameter("cust_phone");
-        String qtyStr     = req.getParameter("qty_ordered");
-        String bookIdStr  = req.getParameter("book_id");
-        String bookTitle  = req.getParameter("book_title");
+        String custName = req.getParameter("cust_name");
+        String custEmail = req.getParameter("cust_email");
+        String custPhone = req.getParameter("cust_phone");
+        String qtyStr = req.getParameter("qty_ordered");
+        String bookIdStr = req.getParameter("book_id");
+        String bookTitle = req.getParameter("book_title");
         String totalPrice = req.getParameter("total_price");
-
         if (custName == null || custEmail == null || custPhone == null || qtyStr == null || bookIdStr == null) {
             resp.setStatus(400);
             out.print("{\"success\":false,\"message\":\"Missing required fields.\"}");
             return;
         }
-
         int qty, bookId;
         double price;
         try {
-            qty    = Integer.parseInt(qtyStr);
+            qty = Integer.parseInt(qtyStr);
             bookId = Integer.parseInt(bookIdStr);
-            price  = totalPrice != null ? Double.parseDouble(totalPrice) : 0.0;
+            price = totalPrice != null ? Double.parseDouble(totalPrice) : 0.0;
         } catch (NumberFormatException e) {
             resp.setStatus(400);
             out.print("{\"success\":false,\"message\":\"Invalid numeric parameters.\"}");
             return;
         }
-
-        String dbUrl  = System.getenv("DB_URL")  != null ? System.getenv("DB_URL")  : "jdbc:mysql://localhost:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
+        String dbUrl = System.getenv("DB_URL") != null ? System.getenv("DB_URL") : "jdbc:mysql://localhost:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
         String dbUser = System.getenv("DB_USER") != null ? System.getenv("DB_USER") : "root";
         String dbPass = System.getenv("DB_PASS") != null ? System.getenv("DB_PASS") : "";
-
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            resp.setStatus(500);
+            out.print("{\"success\":false,\"message\":\"MySQL driver not found.\"}");
+            return;
+        }
         try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass)) {
             conn.setAutoCommit(false);
             try {
@@ -65,7 +66,6 @@ public class OrderPlaceServlet extends HttpServlet {
                     }
                     availableQty = rs.getInt("qty");
                 }
-
                 if (qty > availableQty) {
                     resp.setStatus(409);
                     String message = availableQty == 0
@@ -75,7 +75,6 @@ public class OrderPlaceServlet extends HttpServlet {
                     conn.rollback();
                     return;
                 }
-
                 try (PreparedStatement insertPs = conn.prepareStatement(
                         "INSERT INTO order_records (qty_ordered, cust_name, cust_email, cust_phone, book_id, book_title, total_price) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
                     insertPs.setInt(1, qty);
@@ -87,23 +86,19 @@ public class OrderPlaceServlet extends HttpServlet {
                     insertPs.setDouble(7, price);
                     insertPs.executeUpdate();
                 }
-
                 try (PreparedStatement updatePs = conn.prepareStatement("UPDATE books SET qty = qty - ? WHERE id = ?")) {
                     updatePs.setInt(1, qty);
                     updatePs.setInt(2, bookId);
                     updatePs.executeUpdate();
                 }
-
                 conn.commit();
                 out.print("{\"success\":true,\"message\":\"Order placed successfully.\"}");
-
             } catch (SQLException e) {
                 conn.rollback();
                 throw e;
             } finally {
                 conn.setAutoCommit(true);
             }
-
         } catch (SQLException e) {
             resp.setStatus(500);
             out.print("{\"success\":false,\"message\":\"Database error: " + escapeJson(e.getMessage()) + "\"}");

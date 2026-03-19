@@ -19,22 +19,24 @@ public class BookServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
         PrintWriter out = resp.getWriter();
         String path = req.getPathInfo();
-        if (path == null || path.equals("/")) {
-            out.println("[]");
-            return;
-        }
+        if (path == null || path.equals("/")) { out.println("[]"); return; }
         String id = path.substring(1);
         String dbUrl = System.getenv("DB_URL") != null ? System.getenv("DB_URL") : "jdbc:mysql://localhost:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
         String dbUser = System.getenv("DB_USER") != null ? System.getenv("DB_USER") : "root";
         String dbPass = System.getenv("DB_PASS") != null ? System.getenv("DB_PASS") : "";
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            resp.setStatus(500);
+            out.println("{\"error\":\"MySQL driver not found\"}");
+            return;
+        }
         try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass)) {
-            String sql = "SELECT * FROM books WHERE id = ?";
-            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM books WHERE id = ?")) {
                 ps.setInt(1, Integer.parseInt(id));
                 ResultSet rs = ps.executeQuery();
                 if (rs.next()) {
-                    StringBuilder json = new StringBuilder();
-                    json.append("{");
+                    StringBuilder json = new StringBuilder("{");
                     json.append("\"id\":").append(rs.getInt("id"));
                     json.append(",\"title\":\"").append(escapeJson(rs.getString("title"))).append("\"");
                     json.append(",\"author\":\"").append(escapeJson(rs.getString("author"))).append("\"");
@@ -42,19 +44,15 @@ public class BookServlet extends HttpServlet {
                     json.append(",\"qty\":").append(rs.getInt("qty"));
                     try {
                         String desc = rs.getString("description");
-                        if (desc != null) {
-                            json.append(",\"description\":\"").append(escapeJson(desc)).append("\"");
-                        }
+                        if (desc != null) json.append(",\"description\":\"").append(escapeJson(desc)).append("\"");
                     } catch (Exception e) {}
                     json.append("}");
                     out.println(json.toString());
-                } else {
-                    out.println("{}");
-                }
+                } else { out.println("{}"); }
             }
         } catch (SQLException ex) {
             resp.setStatus(500);
-            out.println("{}");
+            out.println("{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
             ex.printStackTrace();
         }
     }
@@ -76,9 +74,7 @@ public class BookServlet extends HttpServlet {
                     if (c < ' ') {
                         String t = "000" + Integer.toHexString(c);
                         sb.append("\\u" + t.substring(t.length() - 4));
-                    } else {
-                        sb.append(c);
-                    }
+                    } else { sb.append(c); }
             }
         }
         return sb.toString();
