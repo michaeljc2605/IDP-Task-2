@@ -1,7 +1,6 @@
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -33,17 +32,7 @@ public class StaffAuthServlet extends HttpServlet {
             resp.getWriter().println("Missing username or password");
             return;
         }
-        String dbUrl = System.getenv("DB_URL") != null ? System.getenv("DB_URL") : "jdbc:mysql://localhost:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
-        String dbUser = System.getenv("DB_USER") != null ? System.getenv("DB_USER") : "root";
-        String dbPass = System.getenv("DB_PASS") != null ? System.getenv("DB_PASS") : "";
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            resp.setStatus(500);
-            resp.getWriter().println("MySQL driver not found");
-            return;
-        }
-        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass)) {
+        try (Connection conn = Database.open()) {
             String storedHash = null;
             try (PreparedStatement ps = conn.prepareStatement("SELECT password_hash FROM users WHERE username = ?")) {
                 ps.setString(1, username);
@@ -68,8 +57,9 @@ public class StaffAuthServlet extends HttpServlet {
                 resp.getWriter().println("Invalid username or password");
             }
         } catch (SQLException e) {
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            resp.getWriter().println("Database error: " + e.getMessage());
+            resp.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            Database.logFailure("staff authentication", e);
+            resp.getWriter().println("The bookshop database is temporarily unavailable. Please try again.");
         }
     }
 }

@@ -1,5 +1,7 @@
 # 📚 GM eBookshop
 
+For database recovery, remote TLS configuration and the catalogue-only import, see [Database migration](docs/DATABASE-MIGRATION.md). The web application remains Java/Tomcat.
+
 > A full-stack bookshop web application built with Java Servlets, MySQL, and vanilla JavaScript — designed, developed, and shipped solo in a few weeks with the help of Jiulixiang and 2 cups of coffee ☕☕
 
 ---
