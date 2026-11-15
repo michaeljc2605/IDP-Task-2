@@ -1,7 +1,6 @@
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -18,18 +17,8 @@ public class BooksServlet extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
-        String dbUrl = System.getenv("DB_URL") != null ? System.getenv("DB_URL") : "jdbc:mysql://localhost:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
-        String dbUser = System.getenv("DB_USER") != null ? System.getenv("DB_USER") : "root";
-        String dbPass = System.getenv("DB_PASS") != null ? System.getenv("DB_PASS") : "";
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            response.setStatus(500);
-            out.print("{\"error\":\"MySQL driver not found\"}");
-            return;
-        }
         try (
-            Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
+            Connection conn = Database.open();
             Statement stmt = conn.createStatement();
         ) {
             ResultSet rset = stmt.executeQuery("SELECT * FROM books ORDER BY title");
@@ -49,9 +38,9 @@ public class BooksServlet extends HttpServlet {
             json.append("]");
             out.print(json.toString());
         } catch (SQLException ex) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            out.print("{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
-            ex.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            out.print("{\"error\":\"The bookshop database is temporarily unavailable. Please try again.\"}");
+            Database.logFailure("BooksServlet", ex);
         }
         out.close();
     }

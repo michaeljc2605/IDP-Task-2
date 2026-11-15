@@ -98,12 +98,35 @@
     <script src="/js/navbar-v2.js"></script>
     <script src="/js/footer-v2.js"></script>
     <script>
+      function escapeHtml(text) {
+        return String(text ?? '').replace(/[&<>"']/g, character => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[character]));
+      }
+
       function getCart() {
-        return JSON.parse(localStorage.getItem('cart') || '[]');
+        const items = JSON.parse(localStorage.getItem('cart') || '[]');
+        const books = new Map();
+        for (const item of items) {
+          const id = Number(item.id);
+          const quantity = Number(item.quantity);
+          const existing = books.get(id);
+          if (existing) existing.quantity += quantity;
+          else books.set(id, { ...item, id, quantity });
+        }
+        return [...books.values()];
       }
 
       function saveCart(cart) {
         localStorage.setItem('cart', JSON.stringify(cart));
+      }
+
+      function acknowledgeOrderedItem(orderedItem) {
+        const remaining = getCart();
+        const item = remaining.find(item => item.id === orderedItem.id);
+        if (item) item.quantity -= orderedItem.quantity;
+        saveCart(remaining.filter(item => item.quantity > 0));
+        renderCart();
       }
 
       function clearCart() {
@@ -112,14 +135,14 @@
       }
 
       function removeFromCart(bookId) {
-        const cart = getCart().filter(item => item.id !== bookId);
+        const cart = getCart().filter(item => item.id !== Number(bookId));
         saveCart(cart);
         renderCart();
       }
 
       function updateQuantity(bookId, delta) {
         const cart = getCart();
-        const item = cart.find(i => i.id === bookId);
+        const item = cart.find(i => i.id === Number(bookId));
         if (item) {
           item.quantity += delta;
           if (item.quantity <= 0) {
@@ -166,12 +189,12 @@
                 <tr class="hover:bg-gray-50 transition">
                   <td class="px-4 py-3">
                     <div class="flex items-center gap-3">
-                      <img src="/static/bookpage/${item.id}.jpg"
+                      <img src="/static/bookpage/${item.id}.${item.id === 22 ? 'avif' : 'jpg'}?v=20261115c"
                            class="w-10 h-14 object-contain rounded"
                            onerror="this.style.display='none'">
                       <div>
-                        <div class="font-semibold text-gray-800 text-xs">${item.title}</div>
-                        <div class="text-gray-400 text-xs">${item.author}</div>
+                        <div class="font-semibold text-gray-800 text-xs">${escapeHtml(item.title)}</div>
+                        <div class="text-gray-400 text-xs">${escapeHtml(item.author)}</div>
                       </div>
                     </div>
                   </td>
@@ -252,18 +275,21 @@
             if (!res.ok) {
               const data = await res.json().catch(() => ({}));
               errors.push(data.message || `Failed to place order for "${item.title}".`);
+            } else {
+              // Persist each accepted line before attempting the next one or retrying.
+              acknowledgeOrderedItem(item);
             }
           }
 
           if (errors.length > 0) {
-            msg.innerHTML = '❌ ' + errors.map(e => `• ${e}`).join('<br>');
+            msg.textContent = '❌ ' + errors.map(e => `• ${e}`).join('\n');
+            msg.style.whiteSpace = 'pre-line';
             msg.className = 'mt-4 text-sm text-center text-red-500';
             msg.classList.remove('hidden');
             setLoading(false);
             return;
           }
 
-          clearCart();
           msg.textContent = `✅ Order placed successfully! Thank you, ${name}!`;
           msg.className = 'mt-4 text-sm text-center';
           msg.style.color = '#134E4A';

@@ -1,7 +1,6 @@
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import jakarta.servlet.ServletException;
@@ -19,16 +18,7 @@ public class QueryServlet extends HttpServlet {
         response.setContentType(wantsJson ? "application/json" : "text/html");
         PrintWriter out = response.getWriter();
         if (!wantsJson) out.println("<!DOCTYPE html><html><head><title>Query Response</title></head><body>");
-        String dbUrl = System.getenv("DB_URL") != null ? System.getenv("DB_URL") : "jdbc:mysql://localhost:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
-        String dbUser = System.getenv("DB_USER") != null ? System.getenv("DB_USER") : "root";
-        String dbPass = System.getenv("DB_PASS") != null ? System.getenv("DB_PASS") : "";
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            out.print(wantsJson ? "[]" : "<p>Driver not found</p>");
-            return;
-        }
-        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass)) {
+        try (Connection conn = Database.open()) {
             String[] authors = request.getParameterValues("author");
             String format = request.getParameter("format");
             if (authors == null || authors.length == 0) {
@@ -73,16 +63,23 @@ public class QueryServlet extends HttpServlet {
                 } else {
                     out.println("<h3>Thank you for your query.</h3>");
                     for (java.util.Map<String, Object> m : results)
-                        out.println("<p>" + m.get("author") + ", " + m.get("title") + ", $" + m.get("price") + "</p>");
+                        out.println("<p>" + escapeHtml((String) m.get("author")) + ", " + escapeHtml((String) m.get("title")) + ", $" + m.get("price") + "</p>");
                     out.println("<p>==== " + results.size() + " records found =====</p>");
                 }
             }
         } catch (SQLException ex) {
-            out.println(wantsJson ? "{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}" : "<p>Error: " + ex.getMessage() + "</p>");
-            ex.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            out.println(wantsJson ? "{\"error\":\"The bookshop database is temporarily unavailable. Please try again.\"}" : "<p>The bookshop database is temporarily unavailable. Please try again.</p>");
+            Database.logFailure("QueryServlet", ex);
         }
         if (!wantsJson) out.println("</body></html>");
         out.close();
+    }
+
+    private String escapeHtml(String text) {
+        if (text == null) return "";
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                .replace("\"", "&quot;").replace("'", "&#39;");
     }
 
     private String escapeJson(String s) {

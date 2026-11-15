@@ -58,6 +58,12 @@
     <script src="/js/navbar-v2.js"></script>
     <script src="/js/footer-v2.js"></script>
     <script>
+      function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, char => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[char]));
+      }
+
       async function loadOrders() {
         const tbody = document.getElementById('orders-body');
         try {
@@ -67,6 +73,7 @@
             window.location.href = '/stafflogin.html';
             return;
           }
+          if (!resp.ok) throw new Error('Orders are temporarily unavailable.');
 
           const orders = await resp.json();
 
@@ -82,15 +89,15 @@
             <tr class="${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} transition"
                 onmouseover="this.style.backgroundColor='rgba(19,78,74,0.05)';"
                 onmouseout="this.style.backgroundColor='';">
-              <td class="px-6 py-4 font-medium text-gray-800">#${o.id}</td>
-              <td class="px-6 py-4 text-gray-700">${o.cust_name}</td>
-              <td class="px-6 py-4 text-gray-500">${o.cust_email}</td>
-              <td class="px-6 py-4 text-gray-500">${o.cust_phone}</td>
-              <td class="px-6 py-4 text-gray-700">${o.book_title || '—'}</td>
+              <td class="px-6 py-4 font-medium text-gray-800">#${escapeHtml(o.id)}</td>
+              <td class="px-6 py-4 text-gray-700">${escapeHtml(o.cust_name)}</td>
+              <td class="px-6 py-4 text-gray-500">${escapeHtml(o.cust_email)}</td>
+              <td class="px-6 py-4 text-gray-500">${escapeHtml(o.cust_phone)}</td>
+              <td class="px-6 py-4 text-gray-700">${escapeHtml(o.book_title || '—')}</td>
               <td class="px-6 py-4">
                 <span class="px-3 py-1 rounded-full font-medium text-xs"
                       style="background:rgba(19,78,74,0.1); color:#134E4A;">
-                  ${o.qty_ordered}
+                  ${escapeHtml(o.qty_ordered)}
                 </span>
               </td>
               <td class="px-6 py-4 font-semibold" style="color:#134E4A;">

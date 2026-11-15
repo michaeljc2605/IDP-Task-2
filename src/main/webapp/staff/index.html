@@ -134,7 +134,7 @@
     <script>
       (async function () {
         try {
-          const resp = await fetch('/staff/login', { credentials: 'same-origin' });
+          const resp = await fetch('/staff/session', { credentials: 'same-origin' });
           const text = await resp.text();
           const box  = document.getElementById('statusBox');
           if (resp.ok) {

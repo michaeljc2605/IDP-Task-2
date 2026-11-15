@@ -2,9 +2,9 @@
   'use strict';
 
   function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    return String(text ?? '').replace(/[&<>"']/g, character => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[character]));
   }
 
   function getBookIdFromPath() {
@@ -109,7 +109,7 @@
 
   class BookRenderer {
     constructor(book, generator) {
-      this.book      = book;
+      this.book      = { ...book, id: Number(book.id), qty: Number(book.qty), price: Number(book.price) };
       this.generator = generator;
     }
 
@@ -131,7 +131,7 @@
                 ${this.book.qty === 0
                   ? '<div class="book-badge" style="background:var(--secondary)">Sold Out</div>' : ''}
                 <img
-                  src="/static/bookpage/${this.book.id}.jpg"
+                  src="/static/bookpage/${this.book.id}.${this.book.id === 22 ? 'avif' : 'jpg'}?v=20261115c"
                   alt="${escapeHtml(this.book.title)}"
                   onerror="this.style.display='none';"
                 >
@@ -259,16 +259,18 @@
           if (addToCart.disabled) return;
           // --- add to localStorage cart ---
           try {
-            const cart  = JSON.parse(localStorage.getItem('cart') || '[]');
-            const exist = cart.find(i => String(i.id) === String(bookId));
+            const id = Number(bookId);
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]')
+              .map(item => ({ ...item, id: Number(item.id) }));
+            const exist = cart.find(item => item.id === id);
             if (exist) {
-              exist.quantity += 1;
+              exist.quantity = Number(exist.quantity) + 1;
             } else {
               // minimal info — title/author/price pulled from DOM
               const title  = document.querySelector('.book-title')?.textContent  || '';
               const author = document.querySelector('.book-author')?.textContent?.replace(/^by\s+/i, '') || '';
               const price  = parseFloat(document.querySelector('.price-value')?.textContent?.replace('$','')) || 0;
-              cart.push({ id: bookId, title, author, price, quantity: 1 });
+              cart.push({ id, title, author, price, quantity: 1 });
             }
             localStorage.setItem('cart', JSON.stringify(cart));
           } catch (e) { /* silent */ }

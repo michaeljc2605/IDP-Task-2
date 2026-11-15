@@ -1,0 +1,103 @@
+name: Build Java application
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Build the deployable Tomcat WAR
+        run: mvn --batch-mode --no-transfer-progress clean package
+      - name: Verify the WAR contains the repaired backend
+        run: |
+          python3 - <<'PY'
+          import zipfile
+          with zipfile.ZipFile('target/ROOT.war') as archive:
+              required = {
+                  'WEB-INF/classes/Database.class',
+                  'WEB-INF/classes/OrderPlaceServlet.class',
+                  'WEB-INF/classes/OrderTableServlet.class',
+                  'staff/orders.html',
+              }
+              missing = required.difference(archive.namelist())
+              assert not missing, f'Missing application files: {sorted(missing)}'
+              assert archive.testzip() is None
+          print('Verified the Java 17 WAR and repaired application files.')
+          PY
+
+  php-hosting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify storefront safety and checkout behavior
+        run: node --test src/test/*.test.mjs
+      - name: Build the isolated PHP deployment package
+        run: node scripts/package-infinityfree.mjs build/infinityfree-ci
+      - name: Verify Apache routes and private files
+        run: |
+          set -euo pipefail
+          cat > build/Dockerfile.php-check <<'DOCKER'
+          FROM php:8.4-apache
+          RUN a2enmod rewrite
+          COPY build/infinityfree-ci/htdocs/ /var/www/html/
+          RUN printf '<Directory /var/www/html>\nAllowOverride All\nRequire all granted\n</Directory>\n' > /etc/apache2/conf-enabled/ebookshop.conf
+          DOCKER
+          docker build --file build/Dockerfile.php-check --tag ebookshop-php-check .
+          trap 'docker rm --force ebookshop-php-check >/dev/null 2>&1 || true' EXIT
+          docker run --detach --name ebookshop-php-check --publish 127.0.0.1:18082:80 ebookshop-php-check
+          python3 - <<'PY'
+          import time, urllib.request, urllib.error
+          root = 'http://127.0.0.1:18082'
+          for attempt in range(50):
+              try:
+                  urllib.request.urlopen(urllib.request.Request(root + '/', headers={'X-Forwarded-Proto': 'https'}), timeout=2).read()
+                  break
+              except (OSError, urllib.error.URLError):
+                  time.sleep(0.2)
+          else:
+              raise SystemExit('Apache did not become ready')
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, req, fp, code, msg, headers, newurl):
+                  return None
+          try:
+              urllib.request.build_opener(NoRedirect).open(root + '/', timeout=5)
+              raise AssertionError('HTTP should redirect to HTTPS')
+          except urllib.error.HTTPError as response:
+              assert response.code == 301
+              assert response.headers['Location'] == 'https://127.0.0.1:18082/'
+          def request(path):
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(root + path, headers={'X-Forwarded-Proto': 'https'}), timeout=5) as response:
+                      return response.status, response.read().decode('utf-8')
+              except urllib.error.HTTPError as response:
+                  return response.code, response.read().decode('utf-8')
+          for path in ['/', '/book/1', '/book/js/book.js', '/staff/orders.html']:
+              status, body = request(path)
+              assert status == 200 and body, (path, status)
+          cover = urllib.request.Request(root + '/static/bookpage/22.avif?v=20261115c', headers={'X-Forwarded-Proto': 'https'})
+          with urllib.request.urlopen(cover, timeout=5) as response:
+              assert response.status == 200
+              assert response.headers.get_content_type() == 'image/avif'
+          for path in ['/app.php', '/php/lib.php', '/php/config.example.php', '/php/config.local.php', '/php/book.html', '/.git/config', '/WEB-INF/web.xml', '/Database/ebookshop_backup.sql']:
+              status, body = request(path)
+              assert status == 403, (path, status)
+          status, body = request('/api/books')
+          assert status == 503 and 'temporarily unavailable' in body
+          assert '/var/www' not in body and 'PDOException' not in body
+          print('Apache routes, book assets, private paths and safe missing-config response passed.')
+          PY

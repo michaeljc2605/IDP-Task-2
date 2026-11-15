@@ -94,7 +94,7 @@ function applyFilters() {
     // Apply stock filter
     const selectedStock = stockFilter.value;
     if (selectedStock === 'in-stock') {
-        filteredBooks = filteredBooks.filter(book => book.qty > 5);
+        filteredBooks = filteredBooks.filter(book => book.qty > 0);
     } else if (selectedStock === 'low-stock') {
         filteredBooks = filteredBooks.filter(book => book.qty > 0 && book.qty <= 5);
     }
@@ -145,15 +145,17 @@ function createBookCard(book, index) {
     card.className = 'book-card fade-in';
     card.style.animationDelay = `${index * 0.05}s`;
     
-    const stockStatus = getStockStatus(book.qty);
+    const id = Number(book.id);
+    const qty = Number(book.qty);
+    const stockStatus = getStockStatus(qty);
     const stockClass = stockStatus.class;
     const stockText = stockStatus.text;
-    const isSoldOut = book.qty === 0;
+    const isSoldOut = qty === 0;
     
     card.innerHTML = `
         <div class="book-cover">
             <img 
-                src="/static/bookpage/${book.id}.jpg"
+                src="/static/bookpage/${id}.${id === 22 ? 'avif' : 'jpg'}?v=20261115c"
                 alt="${escapeHtml(book.title)}"
                 class="book-cover-img"
                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
@@ -170,14 +172,14 @@ function createBookCard(book, index) {
             <h3 class="book-title">${escapeHtml(book.title)}</h3>
             <div class="book-author">${escapeHtml(book.author)}</div>
             <div class="book-details">
-                <div class="book-price">$${book.price.toFixed(2)}</div>
+                <div class="book-price">$${Number(book.price).toFixed(2)}</div>
                 <div class="book-stock">
                     <span class="stock-indicator ${stockClass}"></span>
                     <span>${stockText}</span>
                 </div>
                 <div class="book-actions">
-                    <button class="btn btn-primary" onclick="addToCart(${book.id})" ${isSoldOut ? 'disabled' : ''}>${isSoldOut ? 'Sold Out' : 'Add to Cart'}</button>
-                    <a class="btn btn-outline" href="/book/${book.id}">Details</a>
+                    <button class="btn btn-primary" onclick="addToCart(${id})" ${isSoldOut ? 'disabled' : ''}>${isSoldOut ? 'Sold Out' : 'Add to Cart'}</button>
+                    <a class="btn btn-outline" href="/book/${id}">Details</a>
                 </div>
             </div>
         </div>
@@ -216,9 +218,9 @@ function getRandomGradient() {
 
 // Escape HTML to prevent XSS
 function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    return String(text ?? '').replace(/[&<>"']/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[character]));
 }
 
 // Show error message
@@ -235,17 +237,19 @@ function showError() {
 
 // Add to cart function
 function addToCart(bookId) {
-    const book = allBooks.find(b => b.id === bookId);
+    const id = Number(bookId);
+    const book = allBooks.find(b => Number(b.id) === id);
     if (!book || book.qty === 0) return;
 
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existing = cart.find(item => item.id === bookId);
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]')
+        .map(item => ({ ...item, id: Number(item.id) }));
+    const existing = cart.find(item => item.id === id);
 
     if (existing) {
-        existing.quantity += 1;
+        existing.quantity = Number(existing.quantity) + 1;
     } else {
         cart.push({
-            id: book.id,
+            id,
             title: book.title,
             author: book.author,
             price: book.price,

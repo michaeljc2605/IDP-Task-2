@@ -1,7 +1,6 @@
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -17,18 +16,14 @@ public class OrderTableServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
+        resp.setHeader("Cache-Control", "no-store");
         PrintWriter out = resp.getWriter();
-        String dbUrl = System.getenv("DB_URL") != null ? System.getenv("DB_URL") : "jdbc:mysql://localhost:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
-        String dbUser = System.getenv("DB_USER") != null ? System.getenv("DB_USER") : "root";
-        String dbPass = System.getenv("DB_PASS") != null ? System.getenv("DB_PASS") : "";
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            resp.setStatus(500);
+        if (req.getSession(false) == null || req.getSession(false).getAttribute("staff.user") == null) {
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             out.print("[]");
             return;
         }
-        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
+        try (Connection conn = Database.open();
              Statement stmt = conn.createStatement()) {
             ResultSet rs = stmt.executeQuery("SELECT * FROM order_records ORDER BY id DESC");
             StringBuilder json = new StringBuilder("[");
@@ -49,14 +44,24 @@ public class OrderTableServlet extends HttpServlet {
             json.append("]");
             out.print(json.toString());
         } catch (SQLException e) {
-            resp.setStatus(500);
+            resp.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
             out.print("[]");
-            e.printStackTrace();
+            Database.logFailure("OrderTableServlet", e);
         }
     }
 
     private String escapeJson(String s) {
         if (s == null) return "";
-        return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
+        StringBuilder escaped = new StringBuilder();
+        for (char c : s.toCharArray()) {
+            switch (c) {
+                case '\\': escaped.append("\\\\"); break;
+                case '"': escaped.append("\\\""); break;
+                default:
+                    if (c < 0x20) escaped.append(String.format("\\u%04x", (int) c));
+                    else escaped.append(c);
+            }
+        }
+        return escaped.toString();
     }
 }

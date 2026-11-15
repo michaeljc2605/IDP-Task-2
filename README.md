@@ -1,5 +1,9 @@
 # 📚 GM eBookshop
 
+**Live website:** [GM eBookshop](https://gm-ebookshop.infinityfreeapp.com/)
+
+For the full free PHP/MySQL deployment, see [InfinityFree deployment](docs/INFINITYFREE.md). The original Java/Tomcat version remains intact; its separate database-migration guide is [here](docs/DATABASE-MIGRATION.md).
+
 > A full-stack bookshop web application built with Java Servlets, MySQL, and vanilla JavaScript — designed, developed, and shipped solo in a few weeks with the help of Jiulixiang and 2 cups of coffee ☕☕
 
 ---
@@ -20,11 +24,11 @@
 ## 🛠️ Tech Stack
 
 ```
-Backend   →  Java Servlets (Jakarta EE 10)
-Database  →  MySQL 8.0+
-Server    →  Apache Tomcat 10  (port 9999)
+Backend   →  Java 17 Servlets (Jakarta EE 10); native PHP 8.4 for the live site
+Database  →  MySQL-compatible SQL
+Server    →  Tomcat 10.1 for Java; Apache/PHP on InfinityFree for the live site
 Frontend  →  HTML5 · CSS3 · Vanilla JavaScript
-Security  →  BCrypt via jbcrypt-0.4.jar
+Security  →  BCrypt staff authentication and protected order APIs
 Styling   →  Custom CSS with #115E59 teal theme
 ```
 
@@ -33,50 +37,37 @@ Styling   →  Custom CSS with #115E59 teal theme
 ## 🗂️ Project Structure
 
 ```
-ROOT/
-├── index.html                  # Book catalog (home page)
-├── querybook.html              # Author search
-├── cart.html                   # Shopping cart + checkout
-├── aboutus.html                # About GM eBookshop
-├── stafflogin.html             # Staff login
-│
-├── css/
-│   ├── global.css              # Design system + CSS variables
-│   ├── navbar.css              # Navbar (teal theme)
-│   ├── footer.css              # Footer (teal theme)
-│   └── index.css               # Home page styles
-│
-├── js/
-│   ├── index.js                # Book grid, filters, add to cart
-│   ├── querybook.js            # Author search logic
-│   ├── navbar-v2.js            # Navbar injection + cart badge
-│   └── footer-v2.js            # Footer injection
-│
-├── static/
-│   ├── bookpage/{id}.jpg       # Book cover images
-│   ├── bannervideo1.mp4        # Hero background video
-│   ├── profile.jpg             # Team photo
-│   └── office.jpg              # Office photo
-│
-├── components/
-│   └── navbar.html             # Shared navbar fragment
-│
-└── WEB-INF/
-    ├── classes/                # Compiled servlet .java + .class files
-    ├── lib/
-    │   └── jbcrypt-0.4.jar     # BCrypt password hashing
-    └── book/
-        └── index.html          # Protected book detail page ⚠️
+.
+├── src/main/java/              # Canonical Java servlet source and Database helper
+├── src/main/webapp/            # Canonical frontend used by both deployments
+│   ├── index.html             # Catalogue
+│   ├── querybook.html         # Author search
+│   ├── cart.html              # Cart and checkout
+│   ├── stafflogin.html        # Staff login
+│   ├── staff/                 # Staff dashboard and orders
+│   ├── css/ · js/ · book/      # Styles, scripts and book-detail assets
+│   ├── static/ · components/  # Images, videos and shared page fragments
+│   └── WEB-INF/book/index.html # Java book-detail template
+├── php/                       # Native PHP routes and private-config example
+├── deployment/ebookshop-catalog-only.sql
+├── scripts/package-infinityfree.mjs
+├── src/test/                  # Cart, Java/MySQL and PHP/MySQL checks
+├── docs/                      # Hosting and migration guides
+├── pom.xml                    # Maven build; produces target/ROOT.war
+└── Dockerfile                 # Java/Tomcat container build
 ```
 
-> **Why is `book/index.html` inside `WEB-INF`?**
-> Files inside `WEB-INF` cannot be accessed directly via browser URL — Tomcat blocks all direct HTTP access to this folder. This means users **must** go through `BookPageServlet` to reach the book detail page, preventing URL bypasses and routing loops from the `@WebServlet("/book/*")` wildcard mapping. It also enforces the MVC pattern: the servlet is the controller, and the HTML is the view.
+Edit Java in `src/main/java` and frontend files in `src/main/webapp`. The older root-level files and `WEB-INF/classes` Java copies are historical copies, not the Maven source directories. Build a fresh WAR rather than deploying an old `target/ROOT.war`.
+
+The Java book-detail template lives under `WEB-INF` so Tomcat serves it through `BookPageServlet` at `/book/{id}`. The PHP package preserves the same public route while keeping its template in the protected `php` directory.
 
 ---
 
 ## 🔌 API Endpoints
 
-| Endpoint | Method | Servlet | Description |
+The native PHP deployment provides the same public routes as the Java servlets below.
+
+| Endpoint | Method | Java servlet | Description |
 |---|---|---|---|
 | `/api/books` | GET | `BooksServlet` | All books as JSON array |
 | `/api/books/{id}` | GET | `BookServlet` | Single book by ID |
@@ -84,121 +75,84 @@ ROOT/
 | `/query` | GET | `QueryServlet` | Search by author (`?author=...&format=json`) |
 | `/api/orders/place` | POST | `OrderPlaceServlet` | Place order + decrement stock |
 | `/api/orders` | GET | `OrderTableServlet` | All orders (staff) |
-| `/staff/login` | POST | `StaffAuthServlet` | Staff login / register |
+| `/staff/login` | POST | `StaffAuthServlet` | Staff login |
 | `/staff/session` | GET | `StaffSessionServlet` | Check staff session |
 
 ---
 
 ## 🗄️ Database Schema
 
-### `books`
-```sql
-id          INT          PRIMARY KEY
-title       VARCHAR(255) NOT NULL
-author      VARCHAR(255) NOT NULL
-price       FLOAT        NOT NULL
-qty         INT          NOT NULL
-description TEXT
-```
+[The catalogue-only SQL file](deployment/ebookshop-catalog-only.sql) is the authoritative schema for `books`, `order_records` and `users`. Import it only into a **new empty database**. It creates **30 catalogue books, zero customer orders and zero staff accounts**; it does not create a default staff login.
 
-### `order_records`
-```sql
-id          INT           AUTO_INCREMENT PRIMARY KEY
-qty_ordered INT           NOT NULL
-cust_name   VARCHAR(30)   NOT NULL
-cust_email  VARCHAR(30)   NOT NULL
-cust_phone  CHAR(8)       NOT NULL
-book_id     INT
-book_title  VARCHAR(255)
-total_price DECIMAL(10,2)
-```
-
-### `users`
-```sql
-id            INT          AUTO_INCREMENT PRIMARY KEY
-username      VARCHAR(50)  UNIQUE NOT NULL
-password_hash VARCHAR(255) NOT NULL
-created_at    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
-```
+Preserve any existing database before migration. The historical `Database/ebookshop_backup.sql` includes private order/contact records and a staff credential hash, so it is not the deployment seed. See [database migration](docs/DATABASE-MIGRATION.md) for recovery and cutover guidance.
 
 ---
 
 ## 🚀 Getting Started
 
-### 1. Start MySQL
+### Live PHP/MySQL deployment
+
+Follow [the InfinityFree deployment guide](docs/INFINITYFREE.md). Package the canonical frontend and PHP routes with:
 
 ```bash
-sudo /usr/local/mysql/support-files/mysql.server start
-/usr/local/mysql/bin/mysql -u root
+node scripts/package-infinityfree.mjs build/infinityfree-release
 ```
 
-### 2. Create the Database
+Use a new output directory. The package excludes live configuration and customer records. On the host, create the private `php/config.local.php` from its example with the assigned database details and exact HTTPS `public_origin`. Keep that file outside GitHub and preserve it during future uploads.
 
-```sql
-CREATE DATABASE ebookshop;
-USE ebookshop;
--- Then run the full schema from Database/ebookshop.sql
-```
+### Original Java/Tomcat deployment
 
-### 3. Compile Servlets
+Use Java 17 or newer, Maven, MySQL and Tomcat 10.1. Run build commands from the repository root.
 
-```bash
-cd /path/to/tomcat/webapps/ROOT/WEB-INF/classes
+1. Start your local MySQL service and create a new empty `ebookshop` database. Import only the catalogue seed:
 
-javac -cp "/path/to/tomcat/lib/servlet-api.jar:\
-  ../lib/jbcrypt-0.4.jar:\
-  /path/to/mysql-connector-j.jar:." \
-  *.java
-```
+   ```bash
+   mysql --user=YOUR_LOCAL_USER --password --execute="CREATE DATABASE ebookshop CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+   mysql --user=YOUR_LOCAL_USER --password ebookshop < deployment/ebookshop-catalog-only.sql
+   ```
 
-### 4. Start Tomcat
+2. Set **`DB_URL`**, **`DB_USER`** and **`DB_PASS`** in the environment that starts Tomcat. `DB_URL` must be a MySQL JDBC URL, for example `jdbc:mysql://localhost:3306/ebookshop?serverTimezone=UTC`. Store the password privately. Remote databases require the provider's verified TLS settings; see [the Java database guide](docs/DATABASE-MIGRATION.md).
+3. Build the deployable application:
 
-```bash
-/path/to/tomcat/bin/shutdown.sh
-/path/to/tomcat/bin/startup.sh
-```
+   ```bash
+   mvn --batch-mode --no-transfer-progress clean package
+   ```
 
-### 5. Open in Browser
+4. Deploy the newly built `target/ROOT.war` to Tomcat's `webapps` directory, then start Tomcat with the database environment available. Tomcat's default URL is `http://localhost:8080/`; use your configured port if different.
+5. Provision or restore staff access privately with a bcrypt password hash. The application has staff login only, with no public registration or default credentials.
 
-```
-http://localhost:9999/
-```
+Run the storefront and cart checks with `node --test src/test/*.test.mjs`. The isolated database checks are `src/test/run-database-tests.sh` for Java and `src/test/run-php-tests.sh` for PHP; their setup requirements are described in the deployment guides.
 
 ---
 
 ## 🔐 Security Notes
 
-- **Passwords** are hashed with BCrypt (`cost=12`) — never stored in plain text
-- **SQL injection** is prevented via `PreparedStatement` throughout
-- **Stock decrement** uses `SELECT ... FOR UPDATE` with transaction rollback to prevent race conditions
-- **Staff pages** check `/staff/session` on load and redirect to login if unauthorized
-- ⚠️ DB credentials are currently hard-coded — move to environment variables for production
+- Staff passwords use bcrypt hashes; staff access is provisioned privately.
+- Submitted SQL values use prepared statements.
+- Orders validate positive quantities, read the title and price from the database, and use `SELECT ... FOR UPDATE` with rollback to protect stock.
+- The orders API requires a staff session, and successful login rotates the session ID.
+- Java reads `DB_URL`, `DB_USER` and `DB_PASS`; PHP reads its private host configuration. Neither deployment requires credentials in source code.
+- Public database errors are generic. Operational details stay in server logs.
 
 ---
 
 ## 🐛 Troubleshooting
 
-**Books not loading (404)**
-```bash
-# Recompile servlets and restart Tomcat
-cd WEB-INF/classes && javac -cp ... *.java
-```
+**Books or routes return 404**
 
-**Database connection error**
-```bash
-# Verify MySQL is running
-sudo /usr/local/mysql/support-files/mysql.server status
-```
+For Java, rebuild with Maven and deploy the fresh `target/ROOT.war` to Tomcat. For PHP, confirm the package's root and private `.htaccess` files are installed as described in the hosting guide.
 
-**Port 9999 already in use**
-```bash
-lsof -ti:9999 | xargs kill -9
-```
+**Database temporarily unavailable**
 
-**Changes not reflecting in browser**
-```
-Cmd + Shift + R  (hard refresh / clear cache)
-```
+Check that the database is running, the schema exists and the deployed application's connection settings match that database. Java needs the three `DB_*` environment variables on the web service; PHP needs the assigned hosting MySQL details in `php/config.local.php`.
+
+**Port already in use**
+
+Use another local Tomcat port or stop the specific service you started. Do not terminate unrelated processes.
+
+**Changes not reflecting in the browser**
+
+Confirm the current build was deployed, then use a hard refresh (`Cmd + Shift + R` on macOS).
 
 ---
 

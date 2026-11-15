@@ -1,7 +1,6 @@
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,17 +20,7 @@ public class BookServlet extends HttpServlet {
         String path = req.getPathInfo();
         if (path == null || path.equals("/")) { out.println("[]"); return; }
         String id = path.substring(1);
-        String dbUrl = System.getenv("DB_URL") != null ? System.getenv("DB_URL") : "jdbc:mysql://localhost:3306/ebookshop?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
-        String dbUser = System.getenv("DB_USER") != null ? System.getenv("DB_USER") : "root";
-        String dbPass = System.getenv("DB_PASS") != null ? System.getenv("DB_PASS") : "";
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            resp.setStatus(500);
-            out.println("{\"error\":\"MySQL driver not found\"}");
-            return;
-        }
-        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass)) {
+        try (Connection conn = Database.open()) {
             try (PreparedStatement ps = conn.prepareStatement("SELECT * FROM books WHERE id = ?")) {
                 ps.setInt(1, Integer.parseInt(id));
                 ResultSet rs = ps.executeQuery();
@@ -51,9 +40,9 @@ public class BookServlet extends HttpServlet {
                 } else { out.println("{}"); }
             }
         } catch (SQLException ex) {
-            resp.setStatus(500);
-            out.println("{\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
-            ex.printStackTrace();
+            resp.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            out.println("{\"error\":\"The bookshop database is temporarily unavailable. Please try again.\"}");
+            Database.logFailure("BookServlet", ex);
         }
     }
 

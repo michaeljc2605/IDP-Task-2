@@ -1,0 +1,20 @@
+Options -Indexes
+AddType image/avif .avif
+DirectoryIndex index.html
+RewriteEngine On
+
+# Keep server source, private configuration and database exports inaccessible.
+RewriteRule ^(?:php|WEB-INF|META-INF|Database|database|deployment|src|target|\.git)(?:/|$) - [F,END,NC]
+RewriteRule (^|/)\. - [F,END]
+RewriteRule \.(?:sql|java|class|war|env|ini|log|bak|zip)$ - [F,END,NC]
+RewriteCond %{THE_REQUEST} \s/+[^?\ ]*\.php(?:[?\ /]|$) [NC]
+RewriteRule ^ - [F,END]
+
+# InfinityFree may terminate TLS at a proxy; require all three HTTP indicators.
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:CF-Visitor} !{"scheme":"https"}
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Root-level API and book routes preserve the existing Java frontend URLs.
+RewriteRule ^(?:api/books(?:/[^/]*)?|api/orders(?:/place)?|query|staff/(?:login|session)|book(?:/[0-9]+)?/?)$ app.php [END,QSA]
