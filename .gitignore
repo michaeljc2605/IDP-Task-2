@@ -3,3 +3,9 @@
 *.jar
 .vscode/
 static/*.mp4
+
+# Private hosting configuration and generated deployment packages
+/php/config.local.php
+/build/
+.env
+.env.*

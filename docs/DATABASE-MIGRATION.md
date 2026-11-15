@@ -1,4 +1,6 @@
-# Move the bookshop database
+# Move the Java bookshop database
+
+This guide applies to the retained Java/Tomcat deployment. For the full native PHP site on InfinityFree, follow [the InfinityFree guide](INFINITYFREE.md).
 
 The website remains the original Java 17 / Tomcat 10 application. Its database can run separately on a MySQL-compatible service such as TiDB Cloud Starter. Moving the database does not move the web server or change that server's sleep behaviour.
 
