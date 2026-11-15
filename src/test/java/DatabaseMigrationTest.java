@@ -41,6 +41,29 @@ public final class DatabaseMigrationTest {
         require(!anonymous.body().contains("fixture@example.invalid"), "Anonymous response must not expose contacts");
         pass("Order records require a staff session");
 
+        try (Connection c = Database.open(); java.sql.PreparedStatement insert = c.prepareStatement("INSERT INTO users (username,password_hash) VALUES (?,?)")) {
+            insert.setString(1, "fixture-staff");
+            insert.setString(2, org.mindrot.jbcrypt.BCrypt.hashpw("fixture-only-password", org.mindrot.jbcrypt.BCrypt.gensalt(4)));
+            insert.executeUpdate();
+        }
+        AuthRequest authenticated = new AuthRequest("fixture-staff", "fixture-only-password", true);
+        String anonymousId = authenticated.sessionId;
+        Response login = new Response();
+        new StaffAuthServlet().doPost(authenticated.proxy(), login.proxy());
+        require(login.status == 200 && login.body().contains("Login successful"), "Valid staff credentials must preserve the login response contract");
+        require(authenticated.rotations == 1 && !anonymousId.equals(authenticated.sessionId), "Successful login must rotate an existing anonymous session ID");
+        require("fixture-staff".equals(authenticated.attributes.get("staff.user")), "The rotated session must receive staff access");
+        require(authenticated.sessionId.equals(authenticated.authorizedSessionId), "Staff access must not be attached to the old anonymous session ID");
+        for (String candidate : new String[] {"fixture-staff", "unknown-staff"}) {
+            AuthRequest rejected = new AuthRequest(candidate, "wrong-password", false);
+            Response failure = new Response();
+            new StaffAuthServlet().doPost(rejected.proxy(), failure.proxy());
+            require(failure.status == 401, "Invalid credentials must be rejected");
+            require(!rejected.sessionExists && rejected.rotations == 0 && !rejected.attributes.containsKey("staff.user"),
+                    "A rejected login must not create, rotate or authorize a session");
+        }
+        pass("Staff login rotates an anonymous session before granting access; invalid credentials never authorize a session");
+
         for (String quantity : new String[] {"-1", "0", "1.5", "2147483648", "not-a-number"}) {
             Response invalid = place(quantity, "1", "0.01", "Tampered title");
             require(invalid.status == 400, "Invalid quantity must return 400: " + quantity);
@@ -135,6 +158,44 @@ public final class DatabaseMigrationTest {
             if (m.getName().equals("getMethod")) return "POST";
             return defaultValue(m.getReturnType());
         });
+    }
+
+    private static final class AuthRequest {
+        final Map<String,String> parameters;
+        final Map<String,Object> attributes = new HashMap<>();
+        boolean sessionExists;
+        String sessionId = "anonymous-fixture-session";
+        String authorizedSessionId;
+        int rotations;
+        AuthRequest(String username, String password, boolean existing) {
+            parameters = Map.of("username", username, "password", password);
+            sessionExists = existing;
+        }
+        HttpServletRequest proxy() {
+            HttpSession session = (HttpSession) Proxy.newProxyInstance(DatabaseMigrationTest.class.getClassLoader(), new Class<?>[] {HttpSession.class}, (p,m,a) -> {
+                if (m.getName().equals("getId")) return sessionId;
+                if (m.getName().equals("getAttribute")) return attributes.get(a[0]);
+                if (m.getName().equals("setAttribute")) {
+                    attributes.put((String)a[0], a[1]);
+                    if (a[0].equals("staff.user")) authorizedSessionId = sessionId;
+                    return null;
+                }
+                return defaultValue(m.getReturnType());
+            });
+            return (HttpServletRequest) Proxy.newProxyInstance(DatabaseMigrationTest.class.getClassLoader(), new Class<?>[] {HttpServletRequest.class}, (p,m,a) -> {
+                if (m.getName().equals("getParameter")) return parameters.get(a[0]);
+                if (m.getName().equals("getSession")) {
+                    if (a == null || a.length == 0 || Boolean.TRUE.equals(a[0])) sessionExists = true;
+                    return sessionExists ? session : null;
+                }
+                if (m.getName().equals("changeSessionId")) {
+                    require(sessionExists, "Session ID rotation requires an existing session");
+                    sessionId = "rotated-fixture-session-" + (++rotations);
+                    return sessionId;
+                }
+                return defaultValue(m.getReturnType());
+            });
+        }
     }
 
     private static final class Response {

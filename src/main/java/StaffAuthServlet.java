@@ -50,7 +50,9 @@ public class StaffAuthServlet extends HttpServlet {
                 ok = org.mindrot.jbcrypt.BCrypt.checkpw(password, storedHash);
             } catch (Exception ex) { ok = false; }
             if (ok) {
-                req.getSession(true).setAttribute("staff.user", username);
+                req.getSession(true);
+                req.changeSessionId();
+                req.getSession(false).setAttribute("staff.user", username);
                 resp.getWriter().println("Login successful");
             } else {
                 resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

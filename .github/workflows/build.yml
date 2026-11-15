@@ -44,6 +44,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify cart retries preserve accepted orders
+        run: node --test src/test/cart-checkout.test.mjs
       - name: Build the isolated PHP deployment package
         run: node scripts/package-infinityfree.mjs build/infinityfree-ci
       - name: Verify Apache routes and private files
