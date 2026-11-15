@@ -235,17 +235,19 @@ function showError() {
 
 // Add to cart function
 function addToCart(bookId) {
-    const book = allBooks.find(b => b.id === bookId);
+    const id = Number(bookId);
+    const book = allBooks.find(b => Number(b.id) === id);
     if (!book || book.qty === 0) return;
 
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existing = cart.find(item => item.id === bookId);
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]')
+        .map(item => ({ ...item, id: Number(item.id) }));
+    const existing = cart.find(item => item.id === id);
 
     if (existing) {
-        existing.quantity += 1;
+        existing.quantity = Number(existing.quantity) + 1;
     } else {
         cart.push({
-            id: book.id,
+            id,
             title: book.title,
             author: book.author,
             price: book.price,

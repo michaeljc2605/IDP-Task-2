@@ -259,16 +259,18 @@
           if (addToCart.disabled) return;
           // --- add to localStorage cart ---
           try {
-            const cart  = JSON.parse(localStorage.getItem('cart') || '[]');
-            const exist = cart.find(i => String(i.id) === String(bookId));
+            const id = Number(bookId);
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]')
+              .map(item => ({ ...item, id: Number(item.id) }));
+            const exist = cart.find(item => item.id === id);
             if (exist) {
-              exist.quantity += 1;
+              exist.quantity = Number(exist.quantity) + 1;
             } else {
               // minimal info — title/author/price pulled from DOM
               const title  = document.querySelector('.book-title')?.textContent  || '';
               const author = document.querySelector('.book-author')?.textContent?.replace(/^by\s+/i, '') || '';
               const price  = parseFloat(document.querySelector('.price-value')?.textContent?.replace('$','')) || 0;
-              cart.push({ id: bookId, title, author, price, quantity: 1 });
+              cart.push({ id, title, author, price, quantity: 1 });
             }
             localStorage.setItem('cart', JSON.stringify(cart));
           } catch (e) { /* silent */ }

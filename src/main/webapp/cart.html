@@ -99,7 +99,16 @@
     <script src="/js/footer-v2.js"></script>
     <script>
       function getCart() {
-        return JSON.parse(localStorage.getItem('cart') || '[]');
+        const items = JSON.parse(localStorage.getItem('cart') || '[]');
+        const books = new Map();
+        for (const item of items) {
+          const id = Number(item.id);
+          const quantity = Number(item.quantity);
+          const existing = books.get(id);
+          if (existing) existing.quantity += quantity;
+          else books.set(id, { ...item, id, quantity });
+        }
+        return [...books.values()];
       }
 
       function saveCart(cart) {
@@ -120,14 +129,14 @@
       }
 
       function removeFromCart(bookId) {
-        const cart = getCart().filter(item => item.id !== bookId);
+        const cart = getCart().filter(item => item.id !== Number(bookId));
         saveCart(cart);
         renderCart();
       }
 
       function updateQuantity(bookId, delta) {
         const cart = getCart();
-        const item = cart.find(i => i.id === bookId);
+        const item = cart.find(i => i.id === Number(bookId));
         if (item) {
           item.quantity += delta;
           if (item.quantity <= 0) {
