@@ -142,7 +142,7 @@ function renderResults(data) {
         card.innerHTML = `
             <div class="flex items-center gap-5 p-5">
                 <img 
-                    src="/static/bookpage/${book.id}.jpg"
+                    src="/static/bookpage/${book.id}.jpg?v=20261115"
                     alt="${escapeHtml(book.title)}"
                     class="w-16 h-22 object-contain rounded-lg flex-shrink-0"
                     style="height:88px;"

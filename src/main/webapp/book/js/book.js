@@ -131,7 +131,7 @@
                 ${this.book.qty === 0
                   ? '<div class="book-badge" style="background:var(--secondary)">Sold Out</div>' : ''}
                 <img
-                  src="/static/bookpage/${this.book.id}.jpg"
+                  src="/static/bookpage/${this.book.id}.jpg?v=20261115"
                   alt="${escapeHtml(this.book.title)}"
                   onerror="this.style.display='none';"
                 >

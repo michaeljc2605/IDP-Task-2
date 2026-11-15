@@ -153,7 +153,7 @@ function createBookCard(book, index) {
     card.innerHTML = `
         <div class="book-cover">
             <img 
-                src="/static/bookpage/${book.id}.jpg"
+                src="/static/bookpage/${book.id}.jpg?v=20261115"
                 alt="${escapeHtml(book.title)}"
                 class="book-cover-img"
                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
