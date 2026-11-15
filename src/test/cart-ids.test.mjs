@@ -79,10 +79,10 @@ async function openDetail(storage) {
   assert.equal(typeof click,'function','Book detail initialization must bind the actual cart button');
   return {click};
 }
-async function openHome(storage) {
+async function openHome(storage, books = [{...sampleBook}]) {
   const visit=browser(storage,async url=>{
     assert.equal(url,'/api/books');
-    return {ok:true,json:async()=>[{...sampleBook}]};
+    return {ok:true,json:async()=>books};
   });
   vm.runInContext(homeScript,visit.context,{filename:'js/index.js'});
   await visit.context.loadBooks();
@@ -131,4 +131,16 @@ test('home Add to Cart reuses legacy detail rows and never adds a duplicate',asy
   const visit=await openHome(storage);
   visit.context.addToCart(4);visit.context.addToCart(4);
   assert.deepEqual(storedCart(storage),[cartBook(4,4)]);
+});
+
+test('In Stock Only includes low stock and excludes books with zero copies', async () => {
+  const books = [0, 1, 5, 6].map((qty, index) => ({ ...sampleBook, id: index + 10, qty }));
+  const visit = await openHome(storageWith([]), books);
+  visit.getNode('stock-filter').value = 'in-stock';
+  visit.context.applyFilters();
+  assert.deepEqual(plain(vm.runInContext('filteredBooks.map(book => book.id)', visit.context)), [11, 12, 13]);
+
+  visit.getNode('stock-filter').value = 'low-stock';
+  visit.context.applyFilters();
+  assert.deepEqual(plain(vm.runInContext('filteredBooks.map(book => book.id)', visit.context)), [11, 12]);
 });

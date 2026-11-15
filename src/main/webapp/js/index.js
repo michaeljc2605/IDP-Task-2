@@ -94,7 +94,7 @@ function applyFilters() {
     // Apply stock filter
     const selectedStock = stockFilter.value;
     if (selectedStock === 'in-stock') {
-        filteredBooks = filteredBooks.filter(book => book.qty > 5);
+        filteredBooks = filteredBooks.filter(book => book.qty > 0);
     } else if (selectedStock === 'low-stock') {
         filteredBooks = filteredBooks.filter(book => book.qty > 0 && book.qty <= 5);
     }
