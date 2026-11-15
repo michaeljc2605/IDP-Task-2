@@ -64,6 +64,27 @@ public final class DatabaseMigrationTest {
         }
         pass("Staff login rotates an anonymous session before granting access; invalid credentials never authorize a session");
 
+        String maliciousTitle = "Title \"<img src=x onerror=alert(1)>";
+        String maliciousAuthor = "Author '&<svg/onload=alert(2)>";
+        try (Connection c = Database.open(); java.sql.PreparedStatement update = c.prepareStatement("UPDATE books SET title=?,author=? WHERE id=1")) {
+            update.setString(1, maliciousTitle); update.setString(2, maliciousAuthor); update.executeUpdate();
+        }
+        try {
+            Response htmlQuery = new Response();
+            new QueryServlet().doGet(request(Map.of("author", maliciousAuthor), false), htmlQuery.proxy());
+            require(htmlQuery.status == 200, "HTML author search must remain available");
+            require(htmlQuery.body().contains("Title &quot;&lt;img src=x onerror=alert(1)&gt;")
+                    && htmlQuery.body().contains("Author &#39;&amp;&lt;svg/onload=alert(2)&gt;"),
+                    "HTML search must encode stored title and author text, including both quote types");
+            require(!htmlQuery.body().contains("<img") && !htmlQuery.body().contains("<svg"),
+                    "Stored catalogue values must not create executable HTML elements");
+        } finally {
+            try (Connection c = Database.open(); java.sql.PreparedStatement update = c.prepareStatement("UPDATE books SET title=?,author=? WHERE id=1")) {
+                update.setString(1, "Canonical book"); update.setString(2, "Fixture author"); update.executeUpdate();
+            }
+        }
+        pass("Java HTML author search escapes malicious stored catalogue titles and authors");
+
         for (String quantity : new String[] {"-1", "0", "1.5", "2147483648", "not-a-number"}) {
             Response invalid = place(quantity, "1", "0.01", "Tampered title");
             require(invalid.status == 400, "Invalid quantity must return 400: " + quantity);
@@ -154,6 +175,7 @@ public final class DatabaseMigrationTest {
                 (p, m, a) -> m.getName().equals("getAttribute") && a[0].equals("staff.user") ? "disposable-staff" : defaultValue(m.getReturnType())) : null;
         return (HttpServletRequest) Proxy.newProxyInstance(DatabaseMigrationTest.class.getClassLoader(), new Class<?>[] {HttpServletRequest.class}, (p,m,a) -> {
             if (m.getName().equals("getParameter")) return parameters.get(a[0]);
+            if (m.getName().equals("getParameterValues")) return parameters.containsKey(a[0]) ? new String[] {parameters.get(a[0])} : null;
             if (m.getName().equals("getSession")) return session;
             if (m.getName().equals("getMethod")) return "POST";
             return defaultValue(m.getReturnType());

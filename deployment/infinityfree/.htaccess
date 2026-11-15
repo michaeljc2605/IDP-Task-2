@@ -1,4 +1,5 @@
 Options -Indexes
+AddType image/avif .avif
 DirectoryIndex index.html
 RewriteEngine On
 

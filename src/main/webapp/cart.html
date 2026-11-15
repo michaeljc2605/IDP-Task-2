@@ -98,6 +98,12 @@
     <script src="/js/navbar-v2.js"></script>
     <script src="/js/footer-v2.js"></script>
     <script>
+      function escapeHtml(text) {
+        return String(text ?? '').replace(/[&<>"']/g, character => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[character]));
+      }
+
       function getCart() {
         const items = JSON.parse(localStorage.getItem('cart') || '[]');
         const books = new Map();
@@ -183,12 +189,12 @@
                 <tr class="hover:bg-gray-50 transition">
                   <td class="px-4 py-3">
                     <div class="flex items-center gap-3">
-                      <img src="/static/bookpage/${item.id}.jpg?v=20261115"
+                      <img src="/static/bookpage/${item.id}.${item.id === 22 ? 'avif' : 'jpg'}?v=20261115c"
                            class="w-10 h-14 object-contain rounded"
                            onerror="this.style.display='none'">
                       <div>
-                        <div class="font-semibold text-gray-800 text-xs">${item.title}</div>
-                        <div class="text-gray-400 text-xs">${item.author}</div>
+                        <div class="font-semibold text-gray-800 text-xs">${escapeHtml(item.title)}</div>
+                        <div class="text-gray-400 text-xs">${escapeHtml(item.author)}</div>
                       </div>
                     </div>
                   </td>

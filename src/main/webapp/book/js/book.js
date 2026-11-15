@@ -2,9 +2,9 @@
   'use strict';
 
   function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    return String(text ?? '').replace(/[&<>"']/g, character => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[character]));
   }
 
   function getBookIdFromPath() {
@@ -109,7 +109,7 @@
 
   class BookRenderer {
     constructor(book, generator) {
-      this.book      = book;
+      this.book      = { ...book, id: Number(book.id), qty: Number(book.qty), price: Number(book.price) };
       this.generator = generator;
     }
 
@@ -131,7 +131,7 @@
                 ${this.book.qty === 0
                   ? '<div class="book-badge" style="background:var(--secondary)">Sold Out</div>' : ''}
                 <img
-                  src="/static/bookpage/${this.book.id}.jpg?v=20261115"
+                  src="/static/bookpage/${this.book.id}.${this.book.id === 22 ? 'avif' : 'jpg'}?v=20261115c"
                   alt="${escapeHtml(this.book.title)}"
                   onerror="this.style.display='none';"
                 >

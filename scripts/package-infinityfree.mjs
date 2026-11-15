@@ -15,7 +15,7 @@ async function copyStatic(directory = '') {
     if (entry.isSymbolicLink()) throw new Error(`Unexpected symlink: ${name}`);
     if (entry.name === 'WEB-INF' || entry.name.startsWith('.') || entry.name === 'META-INF') continue;
     if (entry.isDirectory()) { await copyStatic(name); continue; }
-    if (!entry.isFile() || !/\.(?:html|css|js|png|jpe?g|svg|gif|webp|mp4|woff2?|ttf|ico)$/i.test(entry.name)) continue;
+    if (!entry.isFile() || !/\.(?:html|css|js|png|jpe?g|svg|gif|webp|avif|mp4|woff2?|ttf|ico)$/i.test(entry.name)) continue;
     await mkdir(dirname(join(webRoot, name)), { recursive: true });
     await cp(join(root, 'src/main/webapp', name), join(webRoot, name));
     files.push(name);

@@ -44,8 +44,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify cart controls and checkout retries
-        run: node --test src/test/cart-*.test.mjs
+      - name: Verify storefront safety and checkout behavior
+        run: node --test src/test/*.test.mjs
       - name: Build the isolated PHP deployment package
         run: node scripts/package-infinityfree.mjs build/infinityfree-ci
       - name: Verify Apache routes and private files
@@ -89,6 +89,10 @@ jobs:
           for path in ['/', '/book/1', '/book/js/book.js', '/staff/orders.html']:
               status, body = request(path)
               assert status == 200 and body, (path, status)
+          cover = urllib.request.Request(root + '/static/bookpage/22.avif?v=20261115c', headers={'X-Forwarded-Proto': 'https'})
+          with urllib.request.urlopen(cover, timeout=5) as response:
+              assert response.status == 200
+              assert response.headers.get_content_type() == 'image/avif'
           for path in ['/app.php', '/php/lib.php', '/php/config.example.php', '/php/config.local.php', '/php/book.html', '/.git/config', '/WEB-INF/web.xml', '/Database/ebookshop_backup.sql']:
               status, body = request(path)
               assert status == 403, (path, status)

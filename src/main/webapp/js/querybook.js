@@ -77,7 +77,7 @@ function showAlert(message) {
     alert.innerHTML = `
         <div style="display:flex; align-items:center; gap:0.5rem;">
             <span>⚠️</span>
-            <span>${message}</span>
+            <span>${escapeHtml(message)}</span>
         </div>
     `;
     alert.style.cssText = `
@@ -104,10 +104,9 @@ function showAlert(message) {
 }
 
 function escapeHtml(text) {
-    if (text === null || text === undefined) return '';
-    const div = document.createElement('div');
-    div.textContent = String(text);
-    return div.innerHTML;
+    return String(text ?? '').replace(/[&<>"']/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[character]));
 }
 
 function renderResults(data) {
@@ -133,16 +132,18 @@ function renderResults(data) {
     grid.className = 'grid grid-cols-1 gap-4';
 
     data.forEach(book => {
-        const stockColor = book.qty === 0 ? 'text-red-500' : book.qty <= 5 ? 'text-yellow-600' : 'text-green-600';
-        const stockText = book.qty === 0 ? 'Out of Stock' : book.qty <= 5 ? `Only ${book.qty} left` : `${book.qty} in stock`;
+        const id = Number(book.id);
+        const qty = Number(book.qty);
+        const stockColor = qty === 0 ? 'text-red-500' : qty <= 5 ? 'text-yellow-600' : 'text-green-600';
+        const stockText = qty === 0 ? 'Out of Stock' : qty <= 5 ? `Only ${qty} left` : `${qty} in stock`;
 
         const card = document.createElement('a');
-        card.href = `/book/${book.id}`;
+        card.href = `/book/${id}`;
         card.className = 'block bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-200';
         card.innerHTML = `
             <div class="flex items-center gap-5 p-5">
                 <img 
-                    src="/static/bookpage/${book.id}.jpg?v=20261115"
+                    src="/static/bookpage/${id}.${id === 22 ? 'avif' : 'jpg'}?v=20261115c"
                     alt="${escapeHtml(book.title)}"
                     class="w-16 h-22 object-contain rounded-lg flex-shrink-0"
                     style="height:88px;"

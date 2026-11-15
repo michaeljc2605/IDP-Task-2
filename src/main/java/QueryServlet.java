@@ -63,7 +63,7 @@ public class QueryServlet extends HttpServlet {
                 } else {
                     out.println("<h3>Thank you for your query.</h3>");
                     for (java.util.Map<String, Object> m : results)
-                        out.println("<p>" + m.get("author") + ", " + m.get("title") + ", $" + m.get("price") + "</p>");
+                        out.println("<p>" + escapeHtml((String) m.get("author")) + ", " + escapeHtml((String) m.get("title")) + ", $" + m.get("price") + "</p>");
                     out.println("<p>==== " + results.size() + " records found =====</p>");
                 }
             }
@@ -74,6 +74,12 @@ public class QueryServlet extends HttpServlet {
         }
         if (!wantsJson) out.println("</body></html>");
         out.close();
+    }
+
+    private String escapeHtml(String text) {
+        if (text == null) return "";
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                .replace("\"", "&quot;").replace("'", "&#39;");
     }
 
     private String escapeJson(String s) {
